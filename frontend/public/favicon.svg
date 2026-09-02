@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Harbor booking">
+  <!-- Cleaner version: calendar + confirmed mark -->
+  <rect width="64" height="64" rx="14" fill="#1f6f66"/>
+  <path
+    fill="#ffffff"
+    d="M18 20c0-2.2 1.8-4 4-4h20c2.2 0 4 1.8 4 4v28c0 2.2-1.8 4-4 4H22c-2.2 0-4-1.8-4-4V20z"
+  />
+  <path fill="#dceeea" d="M18 20h28v10H18z"/>
+  <rect x="24" y="14" width="4.5" height="11" rx="2.25" fill="#ffffff"/>
+  <rect x="35.5" y="14" width="4.5" height="11" rx="2.25" fill="#ffffff"/>
+  <rect x="23" y="36" width="7" height="7" rx="1.5" fill="#1f6f66"/>
+  <path
+    d="M34 40.5l3.2 3.2 7-7"
+    fill="none"
+    stroke="#15554e"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
