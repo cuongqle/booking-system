@@ -1,0 +1,74 @@
+<div class="relative flex min-h-dvh flex-col">
+  <header
+    class="sticky top-0 z-20 shrink-0 border-b border-[var(--line)] bg-[var(--surface)]"
+  >
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-3.5">
+      <a class="brand-mark text-xl text-[var(--ink)] sm:text-2xl" routerLink="/">Harbor</a>
+
+      <nav class="flex items-center gap-4 text-sm sm:gap-5">
+        <a
+          class="nav-link hidden sm:inline"
+          routerLink="/"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          Home
+        </a>
+
+        @if (auth.isAuthenticated()) {
+          <a
+            class="nav-link"
+            routerLink="/bookings"
+            routerLinkActive="is-active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Bookings
+          </a>
+          <a class="nav-link" routerLink="/bookings/calendar" routerLinkActive="is-active">Calendar</a>
+          <span class="hidden text-[var(--ink-soft)] md:inline">{{ auth.currentUser()?.fullName }}</span>
+          <button class="btn btn-ghost !px-3 !py-1.5 text-sm" type="button" (click)="logout()">
+            Log out
+          </button>
+        } @else {
+          <a class="nav-link" routerLink="/auth/login" routerLinkActive="is-active">Sign in</a>
+          <a class="btn btn-primary !px-3 !py-1.5 text-sm" routerLink="/auth/register">Join</a>
+        }
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex min-h-0 flex-1 flex-col">
+    <router-outlet />
+  </main>
+
+  <footer class="mt-auto shrink-0 border-t border-[var(--line)] bg-white">
+    <div
+      class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5"
+    >
+      <div class="min-w-0">
+        <a class="brand-mark text-lg text-[var(--ink)]" routerLink="/">Harbor</a>
+        <p class="mt-1 text-sm text-[var(--ink-soft)]">
+          @if (auth.isAuthenticated()) {
+            Signed in as <span class="font-medium text-[var(--ink)]">{{ auth.currentUser()?.email }}</span>
+          } @else {
+            Room reservations without the noise.
+          }
+        </p>
+      </div>
+
+      <nav class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/">Home</a>
+        @if (auth.isAuthenticated()) {
+          <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/bookings">Bookings</a>
+          <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/bookings/calendar">
+            Calendar
+          </a>
+        } @else {
+          <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/auth/login">Sign in</a>
+          <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/auth/register">Join</a>
+        }
+        <span class="text-xs text-[var(--ink-soft)]">© {{ year }}</span>
+      </nav>
+    </div>
+  </footer>
+</div>

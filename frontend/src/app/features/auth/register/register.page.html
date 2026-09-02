@@ -1,0 +1,50 @@
+<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
+  <div class="panel p-6 sm:p-8">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">New here</p>
+      <h1 class="display mt-1 text-3xl text-[var(--ink)]">Create account</h1>
+      <p class="mt-2 text-sm text-[var(--ink-soft)]">One account, all your room reservations.</p>
+    </div>
+
+    @if (error()) {
+      <p class="alert-error mt-5">{{ error() }}</p>
+    }
+
+    <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+      <label class="block space-y-1.5">
+        <span class="text-sm font-medium text-[var(--ink-soft)]">Full name</span>
+        <input class="field" type="text" formControlName="fullName" autocomplete="name" />
+      </label>
+
+      <label class="block space-y-1.5">
+        <span class="text-sm font-medium text-[var(--ink-soft)]">Email</span>
+        <input class="field" type="email" formControlName="email" autocomplete="email" />
+      </label>
+
+      <label class="block space-y-1.5">
+        <span class="text-sm font-medium text-[var(--ink-soft)]">Password</span>
+        <input
+          class="field"
+          type="password"
+          formControlName="password"
+          autocomplete="new-password"
+        />
+        <span class="text-xs text-[var(--ink-soft)]">At least 8 characters</span>
+      </label>
+
+      <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Creating…' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="mt-5 text-sm text-[var(--ink-soft)]">
+      Already registered?
+      <a
+        class="font-semibold text-[var(--ink)] underline decoration-[var(--accent)] underline-offset-4"
+        routerLink="/auth/login"
+      >
+        Sign in
+      </a>
+    </p>
+  </div>
+</section>

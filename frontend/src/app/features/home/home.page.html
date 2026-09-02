@@ -1,0 +1,71 @@
+<section
+  class="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center gap-10 px-4 py-6 sm:px-6 sm:py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16"
+>
+  <div class="max-w-xl fade-up">
+    <p class="brand-mark text-4xl text-[var(--ink)] sm:text-5xl lg:text-[3.5rem]">Harbor</p>
+    <h1 class="display mt-3 text-2xl leading-tight text-[var(--ink)] sm:mt-4 sm:text-4xl lg:text-[2.75rem]">
+      Reserve rooms without the noise.
+    </h1>
+    <p class="mt-3 max-w-xl text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
+      A calm booking workspace—sign in, create stays, and keep every reservation tied to your
+      account.
+    </p>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3 fade-up-delay">
+      @if (auth.isAuthenticated()) {
+        <a class="btn btn-primary" routerLink="/bookings">Open bookings</a>
+        <a class="btn btn-ghost" routerLink="/bookings/calendar">View calendar</a>
+      } @else {
+        <a class="btn btn-primary" routerLink="/auth/register">Get started</a>
+        <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
+      }
+    </div>
+  </div>
+
+  <aside class="w-full max-w-sm shrink-0 fade-up-delay lg:max-w-xs">
+    <div class="panel overflow-hidden">
+      <div class="border-b border-[var(--line)] bg-[#e8f2f0] px-5 py-4">
+        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-deep)]">
+          Stay preview
+        </p>
+        <p class="display mt-1 text-2xl text-[var(--ink)]">Room A101</p>
+        <p class="mt-1 text-sm text-[var(--ink-soft)]">Sep 10 → Sep 12</p>
+      </div>
+
+      <div class="space-y-3 px-5 py-4">
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <span class="text-[var(--ink-soft)]">Status</span>
+          <span class="status-chip status-chip--pending">Pending</span>
+        </div>
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <span class="text-[var(--ink-soft)]">Nights</span>
+          <span class="font-semibold text-[var(--ink)]">2</span>
+        </div>
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <span class="text-[var(--ink-soft)]">Guest</span>
+          <span class="font-semibold text-[var(--ink)]">You</span>
+        </div>
+
+        <div class="mt-2 grid grid-cols-7 gap-1 pt-1">
+          @for (day of previewDays; track $index) {
+            <div class="text-center">
+              <p class="text-[10px] font-semibold uppercase text-[var(--ink-soft)]">{{ day.label }}</p>
+              <div
+                class="mt-1 flex h-8 items-center justify-center rounded-md text-xs font-semibold"
+                [class]="day.active ? 'bg-[var(--accent)] text-white' : 'bg-[var(--surface)] text-[var(--ink-soft)]'"
+              >
+                {{ day.date }}
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (auth.isAuthenticated()) {
+          <a class="btn btn-primary mt-2 w-full" routerLink="/bookings/new">Book a room</a>
+        } @else {
+          <a class="btn btn-primary mt-2 w-full" routerLink="/auth/register">Start booking</a>
+        }
+      </div>
+    </div>
+  </aside>
+</section>

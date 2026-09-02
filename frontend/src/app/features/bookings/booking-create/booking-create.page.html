@@ -1,0 +1,49 @@
+<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
+  <a class="text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)]" routerLink="/bookings">
+    ← Back to list
+  </a>
+
+  <div class="panel mt-5 p-6 sm:p-8">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">Create</p>
+      <h1 class="display mt-1 text-3xl text-[var(--ink)]">New booking</h1>
+      <p class="mt-2 text-sm text-[var(--ink-soft)]">
+        Pick a room and time window. Overlaps with pending or confirmed stays are blocked.
+      </p>
+    </div>
+
+    @if (error()) {
+      <p class="alert-error mt-5">{{ error() }}</p>
+    }
+
+    @if (loadingRooms()) {
+      <p class="mt-6 text-[var(--ink-soft)]">Loading rooms…</p>
+    } @else {
+      <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Room</span>
+          <select class="field" formControlName="roomId">
+            <option value="" disabled>Select a room</option>
+            @for (room of rooms(); track room.id) {
+              <option [value]="room.id">{{ room.id }} — {{ room.name }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
+          <input class="field" type="datetime-local" formControlName="startDate" />
+        </label>
+
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
+          <input class="field" type="datetime-local" formControlName="endDate" />
+        </label>
+
+        <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Creating…' : 'Create booking' }}
+        </button>
+      </form>
+    }
+  </div>
+</section>
