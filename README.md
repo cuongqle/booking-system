@@ -34,15 +34,18 @@ Dev server proxies API calls to the backend (default `localhost:8080`).
 ## Quick start
 
 ```bash
-# Database
-docker compose up -d
+# Postgres + backend (API on http://localhost:8080)
+docker compose up --build
 
-# Backend (Java 21)
+# Or run pieces separately:
+docker compose up -d postgres
 cd backend && ./mvnw spring-boot:run
 
 # Frontend
 cd frontend && npm start   # or yarn start → http://localhost:4200
 ```
+
+Datasource and JWT settings can be overridden with env vars (`SPRING_DATASOURCE_*`, `APP_JWT_*`). In Compose, the API talks to Postgres via hostname `postgres`.
 
 ## Deploy frontend (Vercel)
 

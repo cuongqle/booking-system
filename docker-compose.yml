@@ -16,5 +16,22 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: booking-system-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/booking_system
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      APP_JWT_SECRET: booking-system-dev-secret-key-must-be-at-least-32-chars
+      APP_JWT_EXPIRATION_MS: "86400000"
+    ports:
+      - "8080:8080"
+
 volumes:
   postgres_data:
