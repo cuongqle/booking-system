@@ -46,8 +46,10 @@ cd frontend && npm start   # or yarn start → http://localhost:4200
 
 ## Deploy frontend (Vercel)
 
-This repo includes a root `vercel.json` that builds `frontend/` and publishes Angular’s output at `frontend/dist/frontend/browser`, with SPA rewrites to `index.html`.
+1. In the Vercel project, set **Root Directory** to `frontend`.
+2. Use defaults (or): Build `npm run build`, Output `dist/frontend/browser`.
+3. Clear any custom Install Command that still says `npm install --prefix frontend` (that doubles the path when Root Directory is already `frontend`).
 
-Redeploy after pulling that file. Alternatively, in the Vercel project set **Root Directory** to `frontend` and **Output Directory** to `dist/frontend/browser`.
+`frontend/vercel.json` sets the output directory and SPA rewrites to `index.html`.
 
 Note: production `apiBaseUrl` is empty, so the UI calls `/api/v1` on the same host. Point it at your deployed backend (or add a Vercel rewrite/proxy) before relying on auth/bookings in production.
