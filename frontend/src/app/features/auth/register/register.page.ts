@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
+import { controlErrorMessage, showControlError } from '../../../core/forms/form-errors';
 
 @Component({
   selector: 'app-register-page',
@@ -17,6 +18,8 @@ export class RegisterPage {
 
   readonly error = signal<string | null>(null);
   readonly submitting = signal(false);
+  readonly showError = showControlError;
+  readonly errorMessage = controlErrorMessage;
 
   readonly form = this.fb.nonNullable.group({
     fullName: ['', [Validators.required]],
@@ -27,6 +30,7 @@ export class RegisterPage {
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.error.set('Please fix the highlighted fields');
       return;
     }
 

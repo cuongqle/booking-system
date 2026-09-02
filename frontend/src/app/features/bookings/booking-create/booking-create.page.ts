@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { BookingService } from '../booking.service';
 import { Room } from '../booking.models';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
+import { controlErrorMessage, showControlError } from '../../../core/forms/form-errors';
 import { dateRangeValidator, fromDatetimeLocalValue } from '../date-range.validator';
 
 @Component({
@@ -21,6 +22,8 @@ export class BookingCreatePage implements OnInit {
   readonly loadingRooms = signal(true);
   readonly error = signal<string | null>(null);
   readonly submitting = signal(false);
+  readonly showError = showControlError;
+  readonly errorMessage = controlErrorMessage;
 
   readonly form = this.fb.nonNullable.group(
     {
@@ -47,9 +50,11 @@ export class BookingCreatePage implements OnInit {
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      if (this.form.hasError('dateRange')) {
-        this.error.set('Start time must be before end time');
-      }
+      this.error.set(
+        this.form.hasError('dateRange')
+          ? 'Start time must be before end time'
+          : 'Please fix the highlighted fields',
+      );
       return;
     }
 

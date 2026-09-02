@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
+import { controlErrorMessage, showControlError } from '../../../core/forms/form-errors';
 
 @Component({
   selector: 'app-login-page',
@@ -17,6 +18,8 @@ export class LoginPage {
 
   readonly error = signal<string | null>(null);
   readonly submitting = signal(false);
+  readonly showError = showControlError;
+  readonly errorMessage = controlErrorMessage;
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -26,6 +29,7 @@ export class LoginPage {
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.error.set('Please fix the highlighted fields');
       return;
     }
 

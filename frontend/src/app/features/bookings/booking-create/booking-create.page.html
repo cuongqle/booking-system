@@ -22,22 +22,50 @@
       <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
         <label class="block space-y-1.5">
           <span class="text-sm font-medium text-[var(--ink-soft)]">Room</span>
-          <select class="field" formControlName="roomId">
+          <select
+            class="field"
+            formControlName="roomId"
+            [class.field--invalid]="showError(form.controls.roomId)"
+          >
             <option value="" disabled>Select a room</option>
             @for (room of rooms(); track room.id) {
               <option [value]="room.id">{{ room.id }} — {{ room.name }}</option>
             }
           </select>
+          @if (errorMessage(form.controls.roomId, { required: 'Select a room' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
         </label>
 
         <label class="block space-y-1.5">
           <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
-          <input class="field" type="datetime-local" formControlName="startDate" />
+          <input
+            class="field"
+            type="datetime-local"
+            formControlName="startDate"
+            [class.field--invalid]="showError(form.controls.startDate)"
+          />
+          @if (errorMessage(form.controls.startDate, { required: 'Start time is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
         </label>
 
         <label class="block space-y-1.5">
           <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
-          <input class="field" type="datetime-local" formControlName="endDate" />
+          <input
+            class="field"
+            type="datetime-local"
+            formControlName="endDate"
+            [class.field--invalid]="
+              showError(form.controls.endDate) || (form.hasError('dateRange') && form.touched)
+            "
+          />
+          @if (errorMessage(form.controls.endDate, { required: 'End time is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
+          @if (form.hasError('dateRange') && form.touched && !form.controls.endDate.hasError('required')) {
+            <p class="field-error">End time must be after start time</p>
+          }
         </label>
 
         <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">

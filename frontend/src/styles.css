@@ -88,6 +88,22 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
+  .field.field--invalid {
+    border-color: color-mix(in srgb, var(--danger) 55%, var(--line));
+  }
+
+  .field.field--invalid:focus {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
+  }
+
+  .field-error {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--danger);
+  }
+
   .btn {
     display: inline-flex;
     align-items: center;
