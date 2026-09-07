@@ -1,5 +1,6 @@
 package com.bookingsystem.infrastructure.user;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	boolean existsByEmail(String email);
 
 	long countByOrganizationId(Long organizationId);
+
+	List<UserEntity> findByOrganizationIdOrderByFullNameAscEmailAsc(Long organizationId);
 }

@@ -1,0 +1,3 @@
+ALTER TABLE organizations ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE';
+ALTER TABLE organizations ADD COLUMN suspended_at TIMESTAMP NULL;
+ALTER TABLE organizations ADD COLUMN suspended_reason VARCHAR(500) NULL;

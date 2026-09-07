@@ -7,9 +7,10 @@ Hold is a full-stack generic resource booking app. Authenticated users pick a re
 - Multi-tenant organizations: users belong to a company; resources/bookings/invoices are scoped by org
 - Roles: `USER`, org `ADMIN`, and platform `SUPER_ADMIN` (manage all orgs; not tied to a tenant)
 - Register / sign in with JWT (`USER` when joining; create-org makers become org `ADMIN`)
+- Platform org list/create/suspend for `SUPER_ADMIN` (suspended orgs cannot log in or use APIs)
+- Platform user management per org: promote/demote `ADMIN`, activate/deactivate accounts
 - Persisted resource catalog with types (`MEETING_ROOM`, `DESK`, `EQUIPMENT`, `OTHER`)
 - Admin resource create/edit (active/inactive) within their organization
-- Platform org list/create for `SUPER_ADMIN`
 - Create, view, and edit bookings with start/end date-time
 - Hourly pricing with total amount snapshotted on each booking
 - Stay rules per resource: min/max duration and turnover buffer
@@ -154,6 +155,10 @@ Base path: `/api/v1`
 | `GET` | `/platform/organizations` | List all orgs (**SUPER_ADMIN**) |
 | `GET` | `/platform/organizations/{id}` | Org detail + user count (**SUPER_ADMIN**) |
 | `POST` | `/platform/organizations` | Create org (**SUPER_ADMIN**; `{ "name" }`) |
+| `POST` | `/platform/organizations/{id}/suspend` | Suspend org (**SUPER_ADMIN**; optional `{ "reason" }`) |
+| `POST` | `/platform/organizations/{id}/unsuspend` | Restore org (**SUPER_ADMIN**) |
+| `GET` | `/platform/organizations/{id}/users` | List org users (**SUPER_ADMIN**) |
+| `PATCH` | `/platform/users/{id}` | Update role (`USER`/`ADMIN`) and/or `active` (**SUPER_ADMIN**) |
 | `GET` | `/notifications` | Current user’s notifications |
 | `GET` | `/notifications/unread-count` | Unread badge count |
 | `POST` | `/notifications/{id}/read` | Mark one read |

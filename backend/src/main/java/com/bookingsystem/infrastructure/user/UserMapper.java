@@ -14,6 +14,7 @@ public class UserMapper {
 				entity.getPasswordHash(),
 				entity.getFullName(),
 				entity.getRole(),
+				entity.isActive(),
 				entity.getCreatedAt(),
 				entity.getUpdatedAt());
 	}
@@ -26,6 +27,7 @@ public class UserMapper {
 		entity.setPasswordHash(user.getPasswordHash());
 		entity.setFullName(user.getFullName());
 		entity.setRole(user.getRole());
+		entity.setActive(user.isActive());
 		entity.setCreatedAt(user.getCreatedAt());
 		entity.setUpdatedAt(user.getUpdatedAt());
 		return entity;

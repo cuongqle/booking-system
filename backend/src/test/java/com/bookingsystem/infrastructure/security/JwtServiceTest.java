@@ -28,6 +28,7 @@ class JwtServiceTest {
 				"hash",
 				"Alice",
 				UserRole.ADMIN,
+				true,
 				Instant.now(),
 				Instant.now());
 
@@ -51,6 +52,7 @@ class JwtServiceTest {
 				"hash",
 				"Super",
 				UserRole.SUPER_ADMIN,
+				true,
 				Instant.now(),
 				Instant.now());
 
@@ -66,7 +68,7 @@ class JwtServiceTest {
 	@Test
 	void isValid_rejectsTamperedToken() {
 		User user = new User(
-				1L, 1L, "bob@example.com", "hash", "Bob", UserRole.USER, Instant.now(), Instant.now());
+				1L, 1L, "bob@example.com", "hash", "Bob", UserRole.USER, true, Instant.now(), Instant.now());
 		String token = jwtService.generateToken(user, "Hold Demo", "hold");
 		String[] parts = token.split("\\.");
 		String tampered = parts[0] + "." + parts[1] + ".invalid-signature";

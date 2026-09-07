@@ -1,0 +1,96 @@
+<section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
+  <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">Platform</p>
+      <h1 class="display mt-1 text-3xl text-[var(--ink)] sm:text-4xl">
+        @if (organization(); as org) {
+          {{ org.name }} users
+        } @else {
+          Organization users
+        }
+      </h1>
+      <p class="mt-2 text-sm text-[var(--ink-soft)]">
+        Promote admins or deactivate accounts. Deactivated users cannot sign in.
+      </p>
+    </div>
+    <a class="btn btn-ghost !px-3 !py-1.5 text-sm self-start" routerLink="/platform/organizations">
+      All organizations
+    </a>
+  </div>
+
+  @if (error()) {
+    <p class="alert-error mt-6">{{ error() }}</p>
+  }
+
+  <div class="mt-8">
+    @if (loading()) {
+      <p class="text-[var(--ink-soft)]">Loading users…</p>
+    } @else if (users().length === 0) {
+      <div class="panel px-6 py-14 text-center">
+        <p class="display text-2xl text-[var(--ink)]">No users in this organization</p>
+      </div>
+    } @else {
+      <p class="result-count mb-2">
+        {{ users().length }} {{ users().length === 1 ? 'user' : 'users' }}
+      </p>
+      <ul class="panel overflow-hidden">
+        @for (user of users(); track user.id) {
+          <li
+            class="flex flex-col gap-3 border-b border-[var(--line)] px-5 py-4 last:border-b-0 lg:flex-row lg:items-center lg:justify-between"
+          >
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <p class="font-semibold text-[var(--ink)]">{{ user.fullName }}</p>
+                <span
+                  class="status-chip"
+                  [class.status-chip--confirmed]="user.active"
+                  [class.status-chip--cancelled]="!user.active"
+                >
+                  {{ user.active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+              <p class="mt-0.5 text-sm text-[var(--ink-soft)]">
+                {{ user.email }} · #{{ user.id }} · joined {{ user.createdAt | date: 'mediumDate' }}
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="flex items-center gap-2 text-sm text-[var(--ink-soft)]">
+                <span class="whitespace-nowrap">Role</span>
+                <select
+                  class="field !w-auto !py-1.5 !px-2 text-sm"
+                  [disabled]="actingId() === user.id || !user.active"
+                  [ngModel]="user.role"
+                  (ngModelChange)="setRole(user, $event)"
+                >
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </label>
+
+              @if (user.active) {
+                <button
+                  class="btn btn-ghost !px-3 !py-1.5 text-sm"
+                  type="button"
+                  [disabled]="actingId() === user.id"
+                  (click)="setActive(user, false)"
+                >
+                  Deactivate
+                </button>
+              } @else {
+                <button
+                  class="btn btn-primary !px-3 !py-1.5 text-sm"
+                  type="button"
+                  [disabled]="actingId() === user.id"
+                  (click)="setActive(user, true)"
+                >
+                  Reactivate
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

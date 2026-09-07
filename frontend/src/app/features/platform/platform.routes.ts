@@ -9,5 +9,11 @@ export const PLATFORM_ROUTES: Routes = [
     loadComponent: () =>
       import('./organization-list/organization-list.page').then((m) => m.OrganizationListPage),
   },
+  {
+    path: 'organizations/:id/users',
+    canActivate: [authGuard, superAdminGuard],
+    loadComponent: () =>
+      import('./organization-users/organization-users.page').then((m) => m.OrganizationUsersPage),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'organizations' },
 ];

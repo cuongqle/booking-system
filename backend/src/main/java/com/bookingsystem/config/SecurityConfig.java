@@ -1,6 +1,7 @@
 package com.bookingsystem.config;
 
 import com.bookingsystem.infrastructure.security.JwtAuthenticationFilter;
+import com.bookingsystem.infrastructure.security.OrganizationAccessFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,10 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
+	SecurityFilterChain securityFilterChain(
+			HttpSecurity http,
+			JwtAuthenticationFilter jwtAuthenticationFilter,
+			OrganizationAccessFilter organizationAccessFilter)
 			throws Exception {
 		http
 				.csrf(AbstractHttpConfigurer::disable)
@@ -55,7 +59,8 @@ public class SecurityConfig {
 							response.getWriter().write(
 									"{\"status\":403,\"code\":\"FORBIDDEN\",\"message\":\"Admin access required\"}");
 						}))
-				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilterAfter(organizationAccessFilter, JwtAuthenticationFilter.class);
 
 		return http.build();
 	}

@@ -2,8 +2,10 @@ package com.bookingsystem.interfaces.rest.auth;
 
 import com.bookingsystem.application.organization.InvalidOrganizationRegistrationException;
 import com.bookingsystem.application.organization.OrganizationNotFoundException;
+import com.bookingsystem.application.organization.OrganizationSuspendedException;
 import com.bookingsystem.application.user.InvalidCredentialsException;
 import com.bookingsystem.application.user.UserAlreadyExistsException;
+import com.bookingsystem.application.user.UserInactiveException;
 import com.bookingsystem.application.user.UserNotFoundException;
 import com.bookingsystem.interfaces.rest.common.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -50,5 +52,19 @@ public class AuthExceptionHandler {
 						HttpStatus.BAD_REQUEST.value(),
 						"INVALID_ORGANIZATION",
 						ex.getMessage()));
+	}
+
+	@ExceptionHandler(OrganizationSuspendedException.class)
+	public ResponseEntity<ErrorResponse> handleOrganizationSuspended(OrganizationSuspendedException ex) {
+		return ResponseEntity
+				.status(HttpStatus.FORBIDDEN)
+				.body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "ORG_SUSPENDED", ex.getMessage()));
+	}
+
+	@ExceptionHandler(UserInactiveException.class)
+	public ResponseEntity<ErrorResponse> handleUserInactive(UserInactiveException ex) {
+		return ResponseEntity
+				.status(HttpStatus.FORBIDDEN)
+				.body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "USER_INACTIVE", ex.getMessage()));
 	}
 }

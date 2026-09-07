@@ -5,9 +5,11 @@ import com.bookingsystem.application.organization.OrganizationService;
 import com.bookingsystem.domain.organization.Organization;
 import com.bookingsystem.domain.user.User;
 import com.bookingsystem.domain.user.UserRole;
+import com.bookingsystem.infrastructure.user.UserEntity;
 import com.bookingsystem.infrastructure.user.UserMapper;
 import com.bookingsystem.infrastructure.user.UserRepository;
 import java.time.Instant;
+import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,7 @@ public class UserService {
 			role = UserRole.ADMIN;
 		} else {
 			organization = organizationService.getBySlug(command.organizationSlug());
+			organizationService.requireActive(organization);
 			role = UserRole.USER;
 		}
 
@@ -62,6 +65,7 @@ public class UserService {
 				passwordEncoder.encode(command.password()),
 				command.fullName().trim(),
 				role,
+				true,
 				now,
 				now);
 
@@ -77,6 +81,14 @@ public class UserService {
 			throw new InvalidCredentialsException();
 		}
 
+		if (!user.isActive()) {
+			throw new UserInactiveException();
+		}
+
+		if (user.getOrganizationId() != null) {
+			organizationService.requireActiveById(user.getOrganizationId());
+		}
+
 		return user;
 	}
 
@@ -84,6 +96,60 @@ public class UserService {
 		return userRepository.findById(id)
 				.map(userMapper::toDomain)
 				.orElseThrow(() -> new UserNotFoundException(id));
+	}
+
+	public void requireActive(Long userId) {
+		User user = getById(userId);
+		if (!user.isActive()) {
+			throw new UserInactiveException();
+		}
+	}
+
+	public List<UserSummary> listByOrganization(Long organizationId) {
+		organizationService.getById(organizationId);
+		return userRepository.findByOrganizationIdOrderByFullNameAscEmailAsc(organizationId).stream()
+				.map(this::toSummary)
+				.toList();
+	}
+
+	@Transactional
+	public UserSummary updatePlatformUser(Long userId, UserRole role, Boolean active) {
+		if (role == null && active == null) {
+			throw new InvalidUserManagementException("Provide role and/or active");
+		}
+
+		UserEntity entity = userRepository.findById(userId)
+				.orElseThrow(() -> new UserNotFoundException(userId));
+
+		if (entity.getOrganizationId() == null || entity.getRole() == UserRole.SUPER_ADMIN) {
+			throw new InvalidUserManagementException("Platform users cannot be managed here");
+		}
+
+		organizationService.getById(entity.getOrganizationId());
+
+		if (role != null) {
+			if (role != UserRole.USER && role != UserRole.ADMIN) {
+				throw new InvalidUserManagementException("Role must be USER or ADMIN");
+			}
+			entity.setRole(role);
+		}
+		if (active != null) {
+			entity.setActive(active);
+		}
+		entity.setUpdatedAt(Instant.now());
+
+		return toSummary(userRepository.save(entity));
+	}
+
+	private UserSummary toSummary(UserEntity entity) {
+		return new UserSummary(
+				entity.getId(),
+				entity.getOrganizationId(),
+				entity.getEmail(),
+				entity.getFullName(),
+				entity.getRole(),
+				entity.isActive(),
+				entity.getCreatedAt());
 	}
 
 	private static boolean hasText(String value) {

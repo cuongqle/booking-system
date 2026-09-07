@@ -10,6 +10,7 @@ public class User {
 	private String passwordHash;
 	private String fullName;
 	private UserRole role;
+	private boolean active;
 	private Instant createdAt;
 	private Instant updatedAt;
 
@@ -23,6 +24,7 @@ public class User {
 			String passwordHash,
 			String fullName,
 			UserRole role,
+			boolean active,
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
@@ -31,6 +33,7 @@ public class User {
 		this.passwordHash = passwordHash;
 		this.fullName = fullName;
 		this.role = role;
+		this.active = active;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -81,6 +84,14 @@ public class User {
 
 	public void setRole(UserRole role) {
 		this.role = role;
+	}
+
+	public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 	public Instant getCreatedAt() {

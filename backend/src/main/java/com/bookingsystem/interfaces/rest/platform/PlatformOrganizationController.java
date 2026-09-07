@@ -42,11 +42,28 @@ public class PlatformOrganizationController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public OrganizationResponse create(@Valid @RequestBody CreateOrganizationRequest request) {
 		Organization created = organizationService.create(request.name());
-		OrganizationSummary summary = organizationService.getSummary(created.getId());
+		return OrganizationResponse.from(organizationService.getSummary(created.getId()));
+	}
+
+	@PostMapping("/{id}/suspend")
+	public OrganizationResponse suspend(
+			@PathVariable Long id,
+			@RequestBody(required = false) SuspendOrganizationRequest request) {
+		String reason = request == null ? null : request.reason();
+		OrganizationSummary summary = organizationService.suspend(id, reason);
 		return OrganizationResponse.from(summary);
+	}
+
+	@PostMapping("/{id}/unsuspend")
+	public OrganizationResponse unsuspend(@PathVariable Long id) {
+		return OrganizationResponse.from(organizationService.unsuspend(id));
 	}
 
 	public record CreateOrganizationRequest(
 			@NotBlank @Size(max = 255) String name) {
+	}
+
+	public record SuspendOrganizationRequest(
+			@Size(max = 500) String reason) {
 	}
 }
