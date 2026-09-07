@@ -17,24 +17,20 @@
   @if (loading()) {
     <p class="mt-4 text-[var(--ink-soft)]">Loading calendar…</p>
   } @else {
-    <div
-      class="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1.35fr)_minmax(0,1fr)] gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.85fr)] lg:grid-rows-none lg:items-stretch"
-    >
-      <div class="panel flex min-h-0 flex-col overflow-hidden">
-        <div
-          class="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] bg-[#e8f2f0] px-3 py-3 sm:px-4"
-        >
+    <div class="calendar-boards mt-4 min-h-0 flex-1">
+      <div class="panel calendar-panel overflow-hidden">
+        <div class="calendar-panel-header justify-between gap-3">
           <button
-            class="btn btn-ghost !px-3 !py-1.5"
+            class="btn btn-ghost !px-2.5 !py-1"
             type="button"
             (click)="previousMonth()"
             aria-label="Previous month"
           >
             ‹
           </button>
-          <div class="text-center">
-            <p class="display text-lg text-[var(--ink)] sm:text-xl">{{ monthTitle() }}</p>
-            <div class="mt-0.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs">
+          <div class="min-w-0 text-center">
+            <p class="display text-lg leading-tight text-[var(--ink)] sm:text-xl">{{ monthTitle() }}</p>
+            <div class="mt-0.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-xs leading-snug">
               <span class="font-medium text-[var(--ink-soft)]">
                 {{ monthBookingCount() }} booking{{ monthBookingCount() === 1 ? '' : 's' }} this month
               </span>
@@ -49,7 +45,7 @@
             </div>
           </div>
           <button
-            class="btn btn-ghost !px-3 !py-1.5"
+            class="btn btn-ghost !px-2.5 !py-1"
             type="button"
             (click)="nextMonth()"
             aria-label="Next month"
@@ -58,73 +54,79 @@
           </button>
         </div>
 
-        <div
-          class="grid shrink-0 grid-cols-7 border-b border-[var(--line)] bg-[rgba(255,255,255,0.55)] text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)] sm:text-[11px]"
-        >
-          @for (weekday of weekdays; track weekday) {
-            <div class="px-1 py-2">{{ weekday }}</div>
-          }
-        </div>
+        <div class="calendar-panel-body flex min-h-0 flex-col">
+          <div
+            class="grid shrink-0 grid-cols-7 border-b border-[var(--line)] bg-[rgba(255,255,255,0.55)] text-center text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)] sm:text-[11px]"
+          >
+            @for (weekday of weekdays; track weekday) {
+              <div class="px-1 py-2">{{ weekday }}</div>
+            }
+          </div>
 
-        <div class="grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
-          @for (day of days(); track day.isoDate) {
-            <button
-              type="button"
-              [class]="dayClasses(day)"
-              [attr.aria-pressed]="selectedDate() === day.isoDate"
-              [attr.aria-label]="day.date | date: 'fullDate'"
-              (click)="selectDay(day)"
-            >
-              <div class="flex items-center justify-between gap-1">
-                <span
-                  class="calendar-day-number"
-                  [class.calendar-day-number--today]="day.isToday"
-                  [class.text-[var(--ink)]]="day.inCurrentMonth && !day.isToday"
-                  [class.text-[var(--ink-soft)]]="!day.inCurrentMonth && !day.isToday"
-                >
-                  {{ day.date | date: 'd' }}
-                </span>
-                @if (day.bookings.length > 0) {
+          <div class="grid min-h-0 flex-1 grid-cols-7 grid-rows-6">
+            @for (day of days(); track day.isoDate) {
+              <button
+                type="button"
+                [class]="dayClasses(day)"
+                [attr.aria-pressed]="selectedDate() === day.isoDate"
+                [attr.aria-label]="day.date | date: 'fullDate'"
+                (click)="selectDay(day)"
+              >
+                <div class="flex items-center justify-between gap-1">
                   <span
-                    class="inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold text-white"
+                    class="calendar-day-number"
+                    [class.calendar-day-number--today]="day.isToday"
+                    [class.text-[var(--ink)]]="day.inCurrentMonth && !day.isToday"
+                    [class.text-[var(--ink-soft)]]="!day.inCurrentMonth && !day.isToday"
                   >
-                    {{ day.bookings.length }}
+                    {{ day.date | date: 'd' }}
                   </span>
-                }
-              </div>
+                  @if (day.bookings.length > 0) {
+                    <span
+                      class="inline-flex min-w-5 items-center justify-center rounded-full bg-[var(--accent)] px-1.5 py-0.5 text-[10px] font-bold text-white"
+                    >
+                      {{ day.bookings.length }}
+                    </span>
+                  }
+                </div>
 
-              <div class="calendar-day-pills">
-                @for (booking of day.bookings.slice(0, 2); track booking.id) {
-                  <div [class]="statusMeta(booking.status).pillClass">
-                    {{ booking.resourceId }}
-                  </div>
-                }
-                @if (day.bookings.length > 2) {
-                  <p class="text-[10px] font-medium text-[var(--ink-soft)]">
-                    +{{ day.bookings.length - 2 }} more
-                  </p>
-                }
-              </div>
-            </button>
-          }
+                <div class="calendar-day-pills">
+                  @for (booking of day.bookings.slice(0, 2); track booking.id) {
+                    <div [class]="statusMeta(booking.status).pillClass">
+                      {{ booking.resourceId }}
+                    </div>
+                  }
+                  @if (day.bookings.length > 2) {
+                    <p class="text-[10px] font-medium text-[var(--ink-soft)]">
+                      +{{ day.bookings.length - 2 }} more
+                    </p>
+                  }
+                </div>
+              </button>
+            }
+          </div>
         </div>
       </div>
 
-      <aside class="panel flex min-h-0 flex-col overflow-hidden">
-        <div class="shrink-0 border-b border-[var(--line)] bg-[#e8f2f0] px-4 py-4 sm:px-5">
-          <p class="text-sm font-medium text-[var(--accent-deep)]">Selected day</p>
-          <h2 class="display mt-1 text-xl text-[var(--ink)] sm:text-2xl">
-            {{ selectedDateLabel() }}
-          </h2>
-          @if (selectedDayBookings().length > 0) {
-            <p class="mt-1.5 text-sm text-[var(--ink-soft)]">
-              {{ selectedDayBookings().length }} booking{{ selectedDayBookings().length === 1 ? '' : 's' }}
-              · {{ formatMoney(selectedDayTotal(), selectedDayCurrency()) }}
+      <aside class="panel calendar-panel overflow-hidden">
+        <div class="calendar-panel-header">
+          <div class="min-w-0">
+            <p class="text-sm font-medium leading-snug text-[var(--accent-deep)]">Selected day</p>
+            <h2 class="display mt-0.5 truncate text-lg leading-tight text-[var(--ink)] sm:text-xl">
+              {{ selectedDateLabel() }}
+            </h2>
+            <p class="mt-0.5 text-xs leading-snug text-[var(--ink-soft)]">
+              @if (selectedDayBookings().length > 0) {
+                {{ selectedDayBookings().length }} booking{{ selectedDayBookings().length === 1 ? '' : 's' }}
+                · {{ formatMoney(selectedDayTotal(), selectedDayCurrency()) }}
+              } @else {
+                No bookings
+              }
             </p>
-          }
+          </div>
         </div>
 
-        <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+        <div class="calendar-panel-body min-h-0 overflow-y-auto px-4 py-4 sm:px-5">
           @if (selectedDayBookings().length === 0) {
             <p class="text-sm text-[var(--ink-soft)]">Nothing booked on this day yet.</p>
             <a class="btn btn-primary mt-4" routerLink="/bookings/new">New booking</a>

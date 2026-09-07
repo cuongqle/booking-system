@@ -250,6 +250,63 @@
     color: var(--status-completed);
   }
 
+  .calendar-boards {
+    display: grid;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .calendar-panel {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .calendar-panel-header {
+    display: flex;
+    box-sizing: border-box;
+    height: 5rem;
+    flex-shrink: 0;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    background: #e8f2f0;
+    padding: 0.75rem 1rem;
+    overflow: hidden;
+  }
+
+  .calendar-panel-body {
+    min-height: 0;
+    flex: 1 1 auto;
+  }
+
+  @media (min-width: 640px) {
+    .calendar-panel-header {
+      height: 5.25rem;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .calendar-boards {
+      grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.85fr);
+      grid-template-rows: auto minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    .calendar-panel {
+      display: grid;
+      grid-row: 1 / -1;
+      grid-template-rows: subgrid;
+    }
+
+    .calendar-panel-header {
+      height: auto;
+      min-height: 0;
+    }
+  }
+
   .calendar-day {
     position: relative;
     display: flex;
