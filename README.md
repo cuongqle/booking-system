@@ -13,6 +13,7 @@ Harbor is a full-stack generic resource booking app. Authenticated users pick a 
 - Status workflow: Pending → Confirmed → Canceled / Completed
 - Conflict validation on create and update (includes buffer windows)
 - Month calendar view of your reservations
+- In-app notifications for booking create/update (header bell)
 - Field-level form validation on auth and booking screens
 
 ## Project structure
@@ -135,6 +136,10 @@ Base path: `/api/v1`
 | `POST` | `/bookings` | Create (`PENDING`); body uses `resourceId` |
 | `GET` | `/bookings/{id}` | Own booking |
 | `PUT` | `/bookings/{id}` | Update resource, times, status |
+| `GET` | `/notifications` | Current user’s notifications |
+| `GET` | `/notifications/unread-count` | Unread badge count |
+| `POST` | `/notifications/{id}/read` | Mark one read |
+| `POST` | `/notifications/read-all` | Mark all read |
 
 Promote an admin (after register/login once), or use the seeded account from `V6`:
 

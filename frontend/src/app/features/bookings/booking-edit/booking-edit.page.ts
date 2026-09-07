@@ -14,6 +14,7 @@ import {
 } from '../booking.models';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
 import { controlErrorMessage, showControlError } from '../../../core/forms/form-errors';
+import { NotificationService } from '../../notifications/notification.service';
 import {
   dateRangeValidator,
   fromDatetimeLocalValue,
@@ -30,6 +31,7 @@ export class BookingEditPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly bookingService = inject(BookingService);
+  private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
 
   readonly statuses = BOOKING_STATUSES;
@@ -130,6 +132,7 @@ export class BookingEditPage implements OnInit {
       .subscribe({
         next: (booking) => {
           this.submitting.set(false);
+          this.notifications.refresh();
           void this.router.navigate(['/bookings', booking.id]);
         },
         error: (err) => {

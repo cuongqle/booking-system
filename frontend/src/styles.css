@@ -363,6 +363,10 @@
     background: rgba(255, 255, 255, 0.85);
     transform: translateX(2px);
   }
+
+  .notification-item--unread {
+    background: color-mix(in srgb, var(--accent) 8%, white);
+  }
 }
 
 @keyframes fade-up {

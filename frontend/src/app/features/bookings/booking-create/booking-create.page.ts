@@ -13,6 +13,7 @@ import {
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
 import { controlErrorMessage, showControlError } from '../../../core/forms/form-errors';
 import { dateRangeValidator, fromDatetimeLocalValue } from '../date-range.validator';
+import { NotificationService } from '../../notifications/notification.service';
 
 @Component({
   selector: 'app-booking-create-page',
@@ -23,6 +24,7 @@ import { dateRangeValidator, fromDatetimeLocalValue } from '../date-range.valida
 export class BookingCreatePage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly bookingService = inject(BookingService);
+  private readonly notifications = inject(NotificationService);
   private readonly router = inject(Router);
 
   readonly resources = signal<Resource[]>([]);
@@ -95,6 +97,7 @@ export class BookingCreatePage implements OnInit {
       .subscribe({
         next: (booking) => {
           this.submitting.set(false);
+          this.notifications.refresh();
           void this.router.navigate(['/bookings', booking.id]);
         },
         error: (err) => {

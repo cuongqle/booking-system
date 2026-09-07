@@ -28,6 +28,7 @@
           @if (auth.isAdmin()) {
             <a class="nav-link" routerLink="/resources" routerLinkActive="is-active">Resources</a>
           }
+          <app-notification-bell />
           <span class="hidden text-[var(--ink-soft)] md:inline">{{ auth.currentUser()?.fullName }}</span>
           <button class="btn btn-ghost !px-3 !py-1.5 text-sm" type="button" (click)="logout()">
             Log out
@@ -54,7 +55,7 @@
           @if (auth.isAuthenticated()) {
             Signed in as <span class="font-medium text-[var(--ink)]">{{ auth.currentUser()?.email }}</span>
           } @else {
-            Clear pricing and stay rules, without the noise.
+            Clear pricing, stay rules, and booking alerts—without the noise.
           }
         </p>
       </div>

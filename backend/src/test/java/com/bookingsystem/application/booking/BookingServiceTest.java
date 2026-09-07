@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bookingsystem.application.notification.NotificationService;
 import com.bookingsystem.application.resource.ResourceService;
 import com.bookingsystem.domain.booking.Booking;
 import com.bookingsystem.domain.booking.BookingStatus;
@@ -46,6 +47,9 @@ class BookingServiceTest {
 
 	@Mock
 	private ResourceService resourceService;
+
+	@Mock
+	private NotificationService notificationService;
 
 	@InjectMocks
 	private BookingService bookingService;
@@ -185,6 +189,7 @@ class BookingServiceTest {
 		assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
 		assertThat(result.getTotalAmount()).isEqualByComparingTo("80.00");
 		verify(bookingRepository).save(entity);
+		verify(notificationService).notifyBookingCreated(saved);
 	}
 
 	@Test
@@ -230,6 +235,7 @@ class BookingServiceTest {
 		verify(existing).setTotalAmount(new BigDecimal("80.00"));
 		verify(existing).setCurrency("USD");
 		verify(bookingRepository).save(existing);
+		verify(notificationService).notifyBookingUpdated(updated);
 	}
 
 	@Test

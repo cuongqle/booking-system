@@ -1,5 +1,6 @@
 package com.bookingsystem.application.booking;
 
+import com.bookingsystem.application.notification.NotificationService;
 import com.bookingsystem.application.resource.ResourceService;
 import com.bookingsystem.domain.booking.Booking;
 import com.bookingsystem.domain.booking.BookingStatus;
@@ -28,14 +29,17 @@ public class BookingService {
 	private final BookingRepository bookingRepository;
 	private final BookingMapper bookingMapper;
 	private final ResourceService resourceService;
+	private final NotificationService notificationService;
 
 	public BookingService(
 			BookingRepository bookingRepository,
 			BookingMapper bookingMapper,
-			ResourceService resourceService) {
+			ResourceService resourceService,
+			NotificationService notificationService) {
 		this.bookingRepository = bookingRepository;
 		this.bookingMapper = bookingMapper;
 		this.resourceService = resourceService;
+		this.notificationService = notificationService;
 	}
 
 	public List<Booking> getBookings(Long userId) {
@@ -74,7 +78,9 @@ public class BookingService {
 				now,
 				now);
 
-		return bookingMapper.toDomain(bookingRepository.save(bookingMapper.toEntity(booking)));
+		Booking saved = bookingMapper.toDomain(bookingRepository.save(bookingMapper.toEntity(booking)));
+		notificationService.notifyBookingCreated(saved);
+		return saved;
 	}
 
 	@Transactional
@@ -101,7 +107,9 @@ public class BookingService {
 		existing.setCurrency(resource.getCurrency());
 		existing.setUpdatedAt(Instant.now());
 
-		return bookingMapper.toDomain(bookingRepository.save(existing));
+		Booking saved = bookingMapper.toDomain(bookingRepository.save(existing));
+		notificationService.notifyBookingUpdated(saved);
+		return saved;
 	}
 
 	private Resource requireActiveResource(String resourceId) {
