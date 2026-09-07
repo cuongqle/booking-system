@@ -1,98 +1,112 @@
-<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
+<section class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
   <a class="text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)]" routerLink="/bookings">
     ← Back to list
   </a>
 
-  <div class="panel mt-5 p-6 sm:p-8">
-    <div>
+  <div class="panel mt-5 overflow-hidden">
+    <div class="border-b border-[var(--line)] bg-[#e8f2f0] px-6 py-6 sm:px-8">
       <p class="text-sm font-medium text-[var(--accent-deep)]">Create</p>
       <h1 class="display mt-1 text-3xl text-[var(--ink)]">New booking</h1>
-      <p class="mt-2 text-sm text-[var(--ink-soft)]">
+      <p class="mt-2 max-w-2xl text-sm text-[var(--ink-soft)]">
         Pick a resource and time window. Stay rules and pricing apply automatically.
       </p>
     </div>
 
-    @if (error()) {
-      <p class="alert-error mt-5">{{ error() }}</p>
-    }
+    <div class="px-6 py-6 sm:px-8">
+      @if (error()) {
+        <p class="alert-error mb-5">{{ error() }}</p>
+      }
 
-    @if (loadingResources()) {
-      <p class="mt-6 text-[var(--ink-soft)]">Loading resources…</p>
-    } @else {
-      <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
-          <select
-            class="field"
-            formControlName="resourceId"
-            [class.field--invalid]="showError(form.controls.resourceId)"
-          >
-            <option value="" disabled>Select a resource</option>
-            @for (resource of resources(); track resource.id) {
-              <option [value]="resource.id">
-                {{ resource.id }} — {{ resource.name }} ({{ typeLabel[resource.type] }}) ·
-                {{ resource.pricePerHour }}/hr
-              </option>
+      @if (loadingResources()) {
+        <p class="text-[var(--ink-soft)]">Loading resources…</p>
+      } @else {
+        <form class="space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
+            <select
+              class="field"
+              formControlName="resourceId"
+              [class.field--invalid]="showError(form.controls.resourceId)"
+            >
+              <option value="" disabled>Select a resource</option>
+              @for (resource of resources(); track resource.id) {
+                <option [value]="resource.id">
+                  {{ resource.id }} — {{ resource.name }} ({{ typeLabel[resource.type] }}) ·
+                  {{ resource.pricePerHour }}/hr
+                </option>
+              }
+            </select>
+            @if (errorMessage(form.controls.resourceId, { required: 'Select a resource' }); as message) {
+              <p class="field-error">{{ message }}</p>
             }
-          </select>
-          @if (errorMessage(form.controls.resourceId, { required: 'Select a resource' }); as message) {
-            <p class="field-error">{{ message }}</p>
+          </label>
+
+          @if (selectedResource(); as resource) {
+            <p class="text-sm text-[var(--ink-soft)]">
+              Min {{ resource.minDurationMinutes }}m
+              @if (resource.maxDurationMinutes != null) {
+                · max {{ resource.maxDurationMinutes }}m
+              }
+              @if (resource.bufferMinutes > 0) {
+                · {{ resource.bufferMinutes }}m buffer
+              }
+            </p>
           }
-        </label>
 
-        @if (selectedResource(); as resource) {
-          <p class="text-sm text-[var(--ink-soft)]">
-            Min {{ resource.minDurationMinutes }}m
-            @if (resource.maxDurationMinutes != null) {
-              · max {{ resource.maxDurationMinutes }}m
-            }
-            @if (resource.bufferMinutes > 0) {
-              · {{ resource.bufferMinutes }}m buffer
-            }
-          </p>
-        }
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class="block space-y-1.5">
+              <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
+              <input
+                class="field"
+                type="datetime-local"
+                formControlName="startDate"
+                [class.field--invalid]="showError(form.controls.startDate)"
+              />
+              @if (errorMessage(form.controls.startDate, { required: 'Start time is required' }); as message) {
+                <p class="field-error">{{ message }}</p>
+              }
+            </label>
 
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
-          <input
-            class="field"
-            type="datetime-local"
-            formControlName="startDate"
-            [class.field--invalid]="showError(form.controls.startDate)"
-          />
-          @if (errorMessage(form.controls.startDate, { required: 'Start time is required' }); as message) {
-            <p class="field-error">{{ message }}</p>
+            <label class="block space-y-1.5">
+              <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
+              <input
+                class="field"
+                type="datetime-local"
+                formControlName="endDate"
+                [class.field--invalid]="
+                  showError(form.controls.endDate) || (form.hasError('dateRange') && form.touched)
+                "
+              />
+              @if (errorMessage(form.controls.endDate, { required: 'End time is required' }); as message) {
+                <p class="field-error">{{ message }}</p>
+              }
+              @if (
+                form.hasError('dateRange') && form.touched && !form.controls.endDate.hasError('required')
+              ) {
+                <p class="field-error">End time must be after start time</p>
+              }
+            </label>
+          </div>
+
+          @if (quotedTotal() != null && selectedResource(); as resource) {
+            <div class="rounded-xl bg-[#e8f2f0] px-4 py-3 sm:max-w-xs">
+              <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+                Estimated total
+              </p>
+              <p class="mt-1 text-lg font-semibold text-[var(--accent-deep)]">
+                {{ formatMoney(quotedTotal()!, resource.currency) }}
+              </p>
+            </div>
           }
-        </label>
 
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
-          <input
-            class="field"
-            type="datetime-local"
-            formControlName="endDate"
-            [class.field--invalid]="
-              showError(form.controls.endDate) || (form.hasError('dateRange') && form.touched)
-            "
-          />
-          @if (errorMessage(form.controls.endDate, { required: 'End time is required' }); as message) {
-            <p class="field-error">{{ message }}</p>
-          }
-          @if (form.hasError('dateRange') && form.touched && !form.controls.endDate.hasError('required')) {
-            <p class="field-error">End time must be after start time</p>
-          }
-        </label>
-
-        @if (quotedTotal() != null && selectedResource(); as resource) {
-          <p class="rounded-lg bg-[#e8f2f0] px-4 py-3 text-sm font-semibold text-[var(--ink)]">
-            Estimated total: {{ formatMoney(quotedTotal()!, resource.currency) }}
-          </p>
-        }
-
-        <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
-          {{ submitting() ? 'Creating…' : 'Create booking' }}
-        </button>
-      </form>
-    }
+          <div class="flex flex-wrap items-center gap-3 border-t border-[var(--line)] pt-5">
+            <button class="btn btn-primary" type="submit" [disabled]="submitting()">
+              {{ submitting() ? 'Creating…' : 'Create booking' }}
+            </button>
+            <a class="btn btn-ghost" routerLink="/bookings">Cancel</a>
+          </div>
+        </form>
+      }
+    </div>
   </div>
 </section>

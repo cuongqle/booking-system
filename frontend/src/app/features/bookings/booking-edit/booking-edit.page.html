@@ -1,4 +1,4 @@
-<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
+<section class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
   @if (bookingId(); as id) {
     <a
       class="text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)]"
@@ -12,100 +12,131 @@
     </a>
   }
 
-  <div class="panel mt-5 p-6 sm:p-8">
-    <div>
+  <div class="panel mt-5 overflow-hidden">
+    <div class="border-b border-[var(--line)] bg-[#e8f2f0] px-6 py-6 sm:px-8">
       <p class="text-sm font-medium text-[var(--accent-deep)]">Edit</p>
       <h1 class="display mt-1 text-3xl text-[var(--ink)]">Update booking</h1>
-      <p class="mt-2 text-sm text-[var(--ink-soft)]">
+      <p class="mt-2 max-w-2xl text-sm text-[var(--ink-soft)]">
         Change the resource, time window, or status. Canceled and completed bookings free the
         resource.
       </p>
     </div>
 
-    @if (error()) {
-      <p class="alert-error mt-5">{{ error() }}</p>
-    }
+    <div class="px-6 py-6 sm:px-8">
+      @if (error()) {
+        <p class="alert-error mb-5">{{ error() }}</p>
+      }
 
-    @if (loading()) {
-      <p class="mt-6 text-[var(--ink-soft)]">Loading booking…</p>
-    } @else if (bookingId()) {
-      <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
-          <select
-            class="field"
-            formControlName="resourceId"
-            [class.field--invalid]="showError(form.controls.resourceId)"
-          >
-            <option value="" disabled>Select a resource</option>
-            @for (resource of resources(); track resource.id) {
-              <option [value]="resource.id">
-                {{ resource.id }} — {{ resource.name }} ({{ typeLabel[resource.type] }})
-              </option>
+      @if (loading()) {
+        <p class="text-[var(--ink-soft)]">Loading booking…</p>
+      } @else if (bookingId()) {
+        <form class="space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
+            <select
+              class="field"
+              formControlName="resourceId"
+              [class.field--invalid]="showError(form.controls.resourceId)"
+            >
+              <option value="" disabled>Select a resource</option>
+              @for (resource of resources(); track resource.id) {
+                <option [value]="resource.id">
+                  {{ resource.id }} — {{ resource.name }} ({{ typeLabel[resource.type] }}) ·
+                  {{ resource.pricePerHour }}/hr
+                </option>
+              }
+            </select>
+            @if (errorMessage(form.controls.resourceId, { required: 'Select a resource' }); as message) {
+              <p class="field-error">{{ message }}</p>
             }
-          </select>
-          @if (errorMessage(form.controls.resourceId, { required: 'Select a resource' }); as message) {
-            <p class="field-error">{{ message }}</p>
-          }
-        </label>
+          </label>
 
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
-          <input
-            class="field"
-            type="datetime-local"
-            formControlName="startDate"
-            [class.field--invalid]="showError(form.controls.startDate)"
-          />
-          @if (errorMessage(form.controls.startDate, { required: 'Start time is required' }); as message) {
-            <p class="field-error">{{ message }}</p>
+          @if (selectedResource(); as resource) {
+            <p class="text-sm text-[var(--ink-soft)]">
+              Min {{ resource.minDurationMinutes }}m
+              @if (resource.maxDurationMinutes != null) {
+                · max {{ resource.maxDurationMinutes }}m
+              }
+              @if (resource.bufferMinutes > 0) {
+                · {{ resource.bufferMinutes }}m buffer
+              }
+            </p>
           }
-        </label>
 
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
-          <input
-            class="field"
-            type="datetime-local"
-            formControlName="endDate"
-            [class.field--invalid]="
-              showError(form.controls.endDate) || (form.hasError('dateRange') && form.touched)
-            "
-          />
-          @if (errorMessage(form.controls.endDate, { required: 'End time is required' }); as message) {
-            <p class="field-error">{{ message }}</p>
-          }
-          @if (form.hasError('dateRange') && form.touched && !form.controls.endDate.hasError('required')) {
-            <p class="field-error">End time must be after start time</p>
-          }
-        </label>
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class="block space-y-1.5">
+              <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
+              <input
+                class="field"
+                type="datetime-local"
+                formControlName="startDate"
+                [class.field--invalid]="showError(form.controls.startDate)"
+              />
+              @if (errorMessage(form.controls.startDate, { required: 'Start time is required' }); as message) {
+                <p class="field-error">{{ message }}</p>
+              }
+            </label>
 
-        @if (quotedTotal() != null && selectedResource(); as resource) {
-          <p class="rounded-lg bg-[#e8f2f0] px-4 py-3 text-sm font-semibold text-[var(--ink)]">
-            Estimated total: {{ formatMoney(quotedTotal()!, resource.currency) }}
-          </p>
-        }
+            <label class="block space-y-1.5">
+              <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
+              <input
+                class="field"
+                type="datetime-local"
+                formControlName="endDate"
+                [class.field--invalid]="
+                  showError(form.controls.endDate) || (form.hasError('dateRange') && form.touched)
+                "
+              />
+              @if (errorMessage(form.controls.endDate, { required: 'End time is required' }); as message) {
+                <p class="field-error">{{ message }}</p>
+              }
+              @if (
+                form.hasError('dateRange') && form.touched && !form.controls.endDate.hasError('required')
+              ) {
+                <p class="field-error">End time must be after start time</p>
+              }
+            </label>
+          </div>
 
-        <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Status</span>
-          <select
-            class="field"
-            formControlName="status"
-            [class.field--invalid]="showError(form.controls.status)"
-          >
-            @for (status of statuses; track status.value) {
-              <option [value]="status.value">{{ status.label }}</option>
+          <div class="grid gap-5 sm:grid-cols-2 sm:items-end">
+            <label class="block space-y-1.5">
+              <span class="text-sm font-medium text-[var(--ink-soft)]">Status</span>
+              <select
+                class="field"
+                formControlName="status"
+                [class.field--invalid]="showError(form.controls.status)"
+              >
+                @for (status of statuses; track status.value) {
+                  <option [value]="status.value">{{ status.label }}</option>
+                }
+              </select>
+              @if (errorMessage(form.controls.status, { required: 'Select a status' }); as message) {
+                <p class="field-error">{{ message }}</p>
+              }
+            </label>
+
+            @if (quotedTotal() != null && selectedResource(); as resource) {
+              <div class="rounded-xl bg-[#e8f2f0] px-4 py-3">
+                <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-soft)]">
+                  Estimated total
+                </p>
+                <p class="mt-1 text-lg font-semibold text-[var(--accent-deep)]">
+                  {{ formatMoney(quotedTotal()!, resource.currency) }}
+                </p>
+              </div>
             }
-          </select>
-          @if (errorMessage(form.controls.status, { required: 'Select a status' }); as message) {
-            <p class="field-error">{{ message }}</p>
-          }
-        </label>
+          </div>
 
-        <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
-          {{ submitting() ? 'Saving…' : 'Save changes' }}
-        </button>
-      </form>
-    }
+          <div class="flex flex-wrap items-center gap-3 border-t border-[var(--line)] pt-5">
+            <button class="btn btn-primary" type="submit" [disabled]="submitting()">
+              {{ submitting() ? 'Saving…' : 'Save changes' }}
+            </button>
+            @if (bookingId(); as id) {
+              <a class="btn btn-ghost" [routerLink]="['/bookings', id]">Cancel</a>
+            }
+          </div>
+        </form>
+      }
+    </div>
   </div>
 </section>

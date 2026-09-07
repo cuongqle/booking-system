@@ -19,7 +19,7 @@ import { NotificationService } from '../../notifications/notification.service';
   selector: 'app-booking-create-page',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './booking-create.page.html',
-  host: { class: 'page-shell page-shell--center' },
+  host: { class: 'page-shell' },
 })
 export class BookingCreatePage implements OnInit {
   private readonly fb = inject(FormBuilder);

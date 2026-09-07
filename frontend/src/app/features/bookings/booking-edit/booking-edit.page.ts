@@ -25,7 +25,7 @@ import {
   selector: 'app-booking-edit-page',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './booking-edit.page.html',
-  host: { class: 'page-shell page-shell--center' },
+  host: { class: 'page-shell' },
 })
 export class BookingEditPage implements OnInit {
   private readonly fb = inject(FormBuilder);
