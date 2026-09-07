@@ -32,6 +32,7 @@ export class BookingDetailPage implements OnInit {
   readonly invoice = signal<Invoice | null>(null);
   readonly loading = signal(true);
   readonly paying = signal(false);
+  readonly downloadingPdf = signal(false);
   readonly error = signal<string | null>(null);
   readonly payError = signal<string | null>(null);
   readonly statusMeta = bookingStatusMeta;
@@ -130,6 +131,30 @@ export class BookingDetailPage implements OnInit {
       error: (err) => {
         this.payError.set(extractErrorMessage(err, 'Payment failed'));
         this.paying.set(false);
+      },
+    });
+  }
+
+  downloadPdf(): void {
+    const booking = this.booking();
+    if (!booking || this.downloadingPdf()) {
+      return;
+    }
+    this.downloadingPdf.set(true);
+    this.payError.set(null);
+    this.bookingService.downloadInvoicePdf(booking.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `invoice-booking-${booking.id}.pdf`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.downloadingPdf.set(false);
+      },
+      error: (err) => {
+        this.payError.set(extractErrorMessage(err, 'Failed to download PDF'));
+        this.downloadingPdf.set(false);
       },
     });
   }

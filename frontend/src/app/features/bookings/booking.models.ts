@@ -84,8 +84,19 @@ export interface Resource {
   minDurationMinutes: number;
   maxDurationMinutes: number | null;
   bufferMinutes: number;
+  openTime: string | null;
+  closeTime: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ResourceBlackout {
+  id: number;
+  resourceId: string;
+  startAt: string;
+  endAt: string;
+  reason: string | null;
+  createdAt: string;
 }
 
 export interface BookingWriteRequest {

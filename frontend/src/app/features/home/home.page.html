@@ -1,72 +1,302 @@
-<section
-  class="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center gap-10 px-4 py-6 sm:px-6 sm:py-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16"
->
-  <div class="max-w-xl fade-up">
-    <p class="brand-mark text-4xl text-[var(--ink)] sm:text-5xl lg:text-[3.5rem]">Harbor</p>
-    <h1 class="display mt-3 text-2xl leading-tight text-[var(--ink)] sm:mt-4 sm:text-4xl lg:text-[2.75rem]">
-      Book, pay, and stay in control.
-    </h1>
-    <p class="mt-3 max-w-xl text-sm leading-relaxed text-[var(--ink-soft)] sm:text-base">
-      Sign in, pick a room, desk, or kit, and reserve a time window with hourly pricing, stay
-      limits, and turnover buffers. Each booking gets an invoice—pay to confirm—with in-app
-      alerts when things change. Admins manage resources and can review every booking and invoice.
-    </p>
+<div class="landing">
+  <section class="landing-hero">
+    <div class="landing-hero__sky" aria-hidden="true"></div>
+    <div class="landing-hero__orb landing-hero__orb--a" aria-hidden="true"></div>
+    <div class="landing-hero__orb landing-hero__orb--b" aria-hidden="true"></div>
+    <div class="landing-hero__orb landing-hero__orb--c" aria-hidden="true"></div>
+    <div class="landing-hero__mesh" aria-hidden="true"></div>
 
-    <div class="mt-6 flex flex-wrap items-center gap-3 fade-up-delay">
-      @if (auth.isAuthenticated()) {
-        <a class="btn btn-primary" routerLink="/bookings">Open bookings</a>
-        <a class="btn btn-ghost" routerLink="/bookings/calendar">View calendar</a>
-      } @else {
-        <a class="btn btn-primary" routerLink="/auth/register">Get started</a>
-        <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
-      }
-    </div>
-  </div>
-
-  <aside class="w-full max-w-sm shrink-0 fade-up-delay lg:max-w-xs">
-    <div class="panel overflow-hidden">
-      <div class="border-b border-[var(--line)] bg-[#e8f2f0] px-5 py-4">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--accent-deep)]">
-          Booking preview
+    <div class="landing-hero__inner">
+      <div class="landing-hero__copy fade-up">
+        <p class="brand-lockup brand-mark landing-hero__brand">
+          <img class="brand-lockup__icon" src="favicon.svg" alt="" width="64" height="64" />
+          Hold
         </p>
-        <p class="display mt-1 text-2xl text-[var(--ink)]">A101</p>
-        <p class="mt-1 text-sm text-[var(--ink-soft)]">Meeting room · $40/hr · min 30m · 15m buffer</p>
-      </div>
-
-      <div class="space-y-3 px-5 py-4">
-        <div class="flex items-center justify-between gap-3 text-sm">
-          <span class="text-[var(--ink-soft)]">Window</span>
-          <span class="font-semibold text-[var(--ink)]">Sep 10, 10:00–12:00</span>
-        </div>
-        <div class="flex items-center justify-between gap-3 text-sm">
-          <span class="text-[var(--ink-soft)]">Status</span>
-          <span class="status-chip status-chip--pending">Pending</span>
-        </div>
-        <div class="flex items-center justify-between gap-3 text-sm">
-          <span class="text-[var(--ink-soft)]">Total</span>
-          <span class="font-semibold text-[var(--ink)]">$80.00</span>
-        </div>
-
-        <div class="mt-2 grid grid-cols-7 gap-1 pt-1">
-          @for (day of previewDays; track $index) {
-            <div class="text-center">
-              <p class="text-[10px] font-semibold uppercase text-[var(--ink-soft)]">{{ day.label }}</p>
-              <div
-                class="mt-1 flex h-8 items-center justify-center rounded-md text-xs font-semibold"
-                [class]="day.active ? 'bg-[var(--accent)] text-white' : 'bg-[var(--surface)] text-[var(--ink-soft)]'"
-              >
-                {{ day.date }}
-              </div>
-            </div>
+        <h1 class="display landing-hero__title">
+          <span class="landing-hero__line">Book the room.</span>
+          <span class="landing-hero__line landing-hero__line--soft">Own the calendar.</span>
+        </h1>
+        <p class="landing-hero__lede">
+          Company workspaces for rooms, desks, and kits—priced by the hour, locked in when paid.
+        </p>
+        <div class="landing-hero__actions fade-up-delay">
+          @if (auth.isAuthenticated()) {
+            <a class="btn btn-primary" routerLink="/bookings">Open bookings</a>
+            <a class="btn btn-ghost" routerLink="/bookings/calendar">View calendar</a>
+          } @else {
+            <a class="btn btn-primary" routerLink="/auth/register">Start a workspace</a>
+            <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
           }
         </div>
+      </div>
 
+      <div class="landing-hero__visual fade-up-delay" aria-hidden="true">
+        <div class="landing-stage-wrap">
+          <div class="landing-stage-ring"></div>
+          <div class="landing-stage-ring landing-stage-ring--slow"></div>
+          <div class="landing-stage">
+            <div class="landing-stage__top">
+              <p class="landing-stage__eyebrow">Live hold</p>
+              <span class="landing-stage__pulse"></span>
+            </div>
+            <p class="display landing-stage__resource">A101</p>
+            <p class="landing-stage__meta">Meeting room · $40/hr · 15m buffer</p>
+            <div class="landing-stage__row">
+              <span>Sep 10 · 10:00–12:00</span>
+              <span class="status-chip status-chip--pending">Pending</span>
+            </div>
+            <p class="landing-stage__total">$80.00</p>
+            <div class="landing-stage__days">
+              @for (day of previewDays; track $index) {
+                <div class="landing-stage__day" [class.is-active]="day.active">
+                  <span>{{ day.label }}</span>
+                  <strong>{{ day.date }}</strong>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a class="landing-scroll" href="#workspaces" (click)="scrollToFeatures($event)">
+      <span>Explore Hold</span>
+      <span class="landing-scroll__chevron" aria-hidden="true"></span>
+    </a>
+  </section>
+
+  <section id="workspaces" class="landing-band landing-band--deep">
+    <div class="landing-band__glow" aria-hidden="true"></div>
+    <div class="landing-band__inner reveal">
+      <p class="landing-kicker landing-kicker--on-dark">01 · Workspaces</p>
+      <h2 class="display landing-band__title">One company.<br />One private Hold.</h2>
+      <p class="landing-band__body">
+        Create a workspace or join with a slug. People, resources, bookings, and invoices stay
+        inside your org—nothing bleeds across tenants.
+      </p>
+      <div class="landing-slug">
+        <span class="landing-slug__prefix">slug/</span>
+        <span class="landing-slug__value">acme-studio</span>
+        <span class="landing-slug__cursor" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="reservations" class="landing-section landing-section--reservations">
+    <div class="landing-section__inner reveal">
+      <div class="landing-section__intro">
+        <p class="landing-kicker">02 · Reservations</p>
+        <h2 class="display landing-section__title">Rules that keep the day honest.</h2>
+        <p class="landing-section__body">
+          Hourly pricing, stay limits, turnover buffers, open hours, and blackouts—checked the
+          moment you reserve.
+        </p>
+      </div>
+
+      <div class="landing-rail">
+        <article class="landing-rail__item reveal" style="--d: 0ms">
+          <p class="landing-rail__tag">Room</p>
+          <p class="landing-rail__name">Meeting A101</p>
+          <p class="landing-rail__detail">$40/hr · min 30m · buffer 15m</p>
+        </article>
+        <article class="landing-rail__item reveal" style="--d: 80ms">
+          <p class="landing-rail__tag">Desk</p>
+          <p class="landing-rail__name">Garden B201</p>
+          <p class="landing-rail__detail">$12/hr · open 08:00–20:00</p>
+        </article>
+        <article class="landing-rail__item reveal" style="--d: 160ms">
+          <p class="landing-rail__tag">Kit</p>
+          <p class="landing-rail__name">AV C301</p>
+          <p class="landing-rail__detail">$25/hr · blackout ready</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="invoices" class="landing-section landing-section--wash">
+    <div class="landing-section__inner reveal">
+      <div class="landing-section__intro">
+        <p class="landing-kicker">03 · Invoices</p>
+        <h2 class="display landing-section__title">Pay once. Confirm forever.</h2>
+        <p class="landing-section__body">
+          Every booking mints an invoice. Clear payment to confirm, download the PDF, and keep the
+          total tied to the window you reserved.
+        </p>
+      </div>
+
+      <ol class="landing-flow">
+        <li class="reveal" style="--d: 0ms">
+          <span class="landing-flow__step">1</span>
+          <div>
+            <p class="landing-flow__title">Create booking</p>
+            <p class="landing-flow__copy">Starts Pending</p>
+          </div>
+        </li>
+        <li class="reveal" style="--d: 90ms">
+          <span class="landing-flow__step">2</span>
+          <div>
+            <p class="landing-flow__title">Invoice issued</p>
+            <p class="landing-flow__copy">Amount matches the window</p>
+          </div>
+        </li>
+        <li class="reveal" style="--d: 180ms">
+          <span class="landing-flow__step">3</span>
+          <div>
+            <p class="landing-flow__title">Pay &amp; confirm</p>
+            <p class="landing-flow__copy">Paid · booking locked in</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="alerts" class="landing-section landing-section--alerts">
+    <div class="landing-section__inner landing-section__inner--alerts reveal">
+      <div class="landing-section__intro">
+        <p class="landing-kicker">04 · Alerts</p>
+        <h2 class="display landing-section__title">The bell never sleeps.</h2>
+        <p class="landing-section__body">
+          Created, updated, or paid—catch every change in-app without digging through email.
+        </p>
+      </div>
+
+      <div class="landing-bell-demo" aria-hidden="true">
+        <div class="landing-alert is-live">
+          <span class="landing-alert__dot"></span>
+          <div>
+            <p class="font-semibold text-[var(--ink)]">Payment received</p>
+            <p class="text-sm text-[var(--ink-soft)]">A101 confirmed for Sep 10</p>
+          </div>
+        </div>
+        <div class="landing-alert landing-alert--muted">
+          <span class="landing-alert__dot landing-alert__dot--soft"></span>
+          <div>
+            <p class="font-semibold text-[var(--ink)]">Booking updated</p>
+            <p class="text-sm text-[var(--ink-soft)]">Window moved to 11:00–13:00</p>
+          </div>
+        </div>
+        <div class="landing-alert landing-alert--muted">
+          <span class="landing-alert__dot landing-alert__dot--soft"></span>
+          <div>
+            <p class="font-semibold text-[var(--ink)]">Booking created</p>
+            <p class="text-sm text-[var(--ink-soft)]">B201 pending payment</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="admin" class="landing-band landing-band--mint">
+    <div class="landing-band__inner reveal">
+      <p class="landing-kicker">05 · Org admin</p>
+      <h2 class="display landing-band__title landing-band__title--ink">
+        Command your catalog.<br />Ignore everyone else’s.
+      </h2>
+      <p class="landing-band__body landing-band__body--ink">
+        Shape resources, hours, and blackouts. Review every booking and invoice in your
+        workspace—never another company’s.
+      </p>
+      <div class="landing-admin-line">
+        <span>Resources</span>
+        <span>Org bookings</span>
+        <span>Org invoices</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing-cta">
+    <div class="landing-cta__aurora" aria-hidden="true"></div>
+    <div class="landing-cta__inner reveal">
+      <p class="brand-lockup brand-mark landing-cta__brand">
+        <img class="brand-lockup__icon" src="favicon.svg" alt="" width="48" height="48" />
+        Hold
+      </p>
+      <h2 class="display landing-cta__title">Your workspace is one click away.</h2>
+      <p class="landing-cta__copy">
+        Spin up a company, share the slug, and start booking shared space with clarity.
+      </p>
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
         @if (auth.isAuthenticated()) {
-          <a class="btn btn-primary mt-2 w-full" routerLink="/bookings/new">Book a resource</a>
+          <a class="btn btn-primary" routerLink="/bookings/new">Book a resource</a>
+          <a class="btn btn-ghost" routerLink="/bookings">My bookings</a>
         } @else {
-          <a class="btn btn-primary mt-2 w-full" routerLink="/auth/register">Start booking</a>
+          <a class="btn btn-primary" routerLink="/auth/register">Create workspace</a>
+          <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
         }
       </div>
     </div>
-  </aside>
-</section>
+  </section>
+
+  <footer class="landing-footer">
+    <div class="landing-footer__inner">
+      <div class="landing-footer__brand">
+        <a class="brand-lockup brand-mark text-2xl text-[var(--ink)]" routerLink="/">
+          <img class="brand-lockup__icon" src="favicon.svg" alt="" width="32" height="32" />
+          Hold
+        </a>
+        <p class="mt-2 max-w-xs text-sm leading-relaxed text-[var(--ink-soft)]">
+          Company workspaces for rooms, desks, and kits—book by the hour, confirm when paid.
+        </p>
+      </div>
+
+      <div class="landing-footer__cols">
+        <div>
+          <p class="landing-footer__heading">Product</p>
+          <nav class="landing-footer__links">
+            <a href="#workspaces" (click)="scrollToSection($event, 'workspaces')">Workspaces</a>
+            <a href="#reservations" (click)="scrollToSection($event, 'reservations')">Reservations</a>
+            <a href="#invoices" (click)="scrollToSection($event, 'invoices')">Invoices</a>
+            <a href="#alerts" (click)="scrollToSection($event, 'alerts')">Alerts</a>
+            <a href="#admin" (click)="scrollToSection($event, 'admin')">Org admin</a>
+          </nav>
+        </div>
+
+        <div>
+          <p class="landing-footer__heading">Workspace</p>
+          <nav class="landing-footer__links">
+            <a routerLink="/">Home</a>
+            @if (auth.isAuthenticated()) {
+              <a routerLink="/bookings">Bookings</a>
+              <a routerLink="/bookings/calendar">Calendar</a>
+              <a routerLink="/invoices">Invoices</a>
+              @if (auth.isAdmin()) {
+                <a routerLink="/resources">Resources</a>
+              }
+            } @else {
+              <a routerLink="/auth/register">Create workspace</a>
+              <a routerLink="/auth/login">Sign in</a>
+            }
+          </nav>
+        </div>
+
+        <div>
+          <p class="landing-footer__heading">Account</p>
+          <nav class="landing-footer__links">
+            @if (auth.isAuthenticated()) {
+              <a routerLink="/bookings/new">New booking</a>
+              <a routerLink="/invoices">My invoices</a>
+              <button type="button" class="landing-footer__button" (click)="logout()">Log out</button>
+            } @else {
+              <a routerLink="/auth/register">Join</a>
+              <a routerLink="/auth/login">Sign in</a>
+            }
+          </nav>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer__bar">
+      <p>© {{ year }} Hold</p>
+      <nav class="landing-footer__bar-links">
+        <a routerLink="/">Home</a>
+        @if (auth.isAuthenticated()) {
+          <a routerLink="/bookings">Bookings</a>
+          <a routerLink="/invoices">Invoices</a>
+        } @else {
+          <a routerLink="/auth/login">Sign in</a>
+          <a routerLink="/auth/register">Join</a>
+        }
+      </nav>
+    </div>
+  </footer>
+</div>

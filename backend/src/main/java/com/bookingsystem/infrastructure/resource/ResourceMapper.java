@@ -9,6 +9,7 @@ public class ResourceMapper {
 	public Resource toDomain(ResourceEntity entity) {
 		return new Resource(
 				entity.getId(),
+				entity.getOrganizationId(),
 				entity.getName(),
 				entity.getDescription(),
 				entity.getType(),
@@ -18,6 +19,8 @@ public class ResourceMapper {
 				entity.getMinDurationMinutes(),
 				entity.getMaxDurationMinutes(),
 				entity.getBufferMinutes(),
+				entity.getOpenTime(),
+				entity.getCloseTime(),
 				entity.getCreatedAt(),
 				entity.getUpdatedAt());
 	}
@@ -25,6 +28,7 @@ public class ResourceMapper {
 	public ResourceEntity toEntity(Resource resource) {
 		ResourceEntity entity = new ResourceEntity();
 		entity.setId(resource.getId());
+		entity.setOrganizationId(resource.getOrganizationId());
 		entity.setName(resource.getName());
 		entity.setDescription(resource.getDescription());
 		entity.setType(resource.getType());
@@ -34,6 +38,8 @@ public class ResourceMapper {
 		entity.setMinDurationMinutes(resource.getMinDurationMinutes());
 		entity.setMaxDurationMinutes(resource.getMaxDurationMinutes());
 		entity.setBufferMinutes(resource.getBufferMinutes());
+		entity.setOpenTime(resource.getOpenTime());
+		entity.setCloseTime(resource.getCloseTime());
 		entity.setCreatedAt(resource.getCreatedAt());
 		entity.setUpdatedAt(resource.getUpdatedAt());
 		return entity;

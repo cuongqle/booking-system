@@ -1,8 +1,10 @@
 package com.bookingsystem.application.auth;
 
+import com.bookingsystem.application.organization.OrganizationService;
 import com.bookingsystem.application.user.LoginCommand;
 import com.bookingsystem.application.user.RegisterUserCommand;
 import com.bookingsystem.application.user.UserService;
+import com.bookingsystem.domain.organization.Organization;
 import com.bookingsystem.domain.user.User;
 import com.bookingsystem.infrastructure.security.JwtService;
 import org.springframework.stereotype.Service;
@@ -11,10 +13,15 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
 	private final UserService userService;
+	private final OrganizationService organizationService;
 	private final JwtService jwtService;
 
-	public AuthService(UserService userService, JwtService jwtService) {
+	public AuthService(
+			UserService userService,
+			OrganizationService organizationService,
+			JwtService jwtService) {
 		this.userService = userService;
+		this.organizationService = organizationService;
 		this.jwtService = jwtService;
 	}
 
@@ -29,9 +36,13 @@ public class AuthService {
 	}
 
 	private AuthResult toResult(User user) {
+		Organization organization = organizationService.getById(user.getOrganizationId());
 		return new AuthResult(
-				jwtService.generateToken(user),
+				jwtService.generateToken(user, organization.getName(), organization.getSlug()),
 				user.getId(),
+				organization.getId(),
+				organization.getName(),
+				organization.getSlug(),
 				user.getEmail(),
 				user.getFullName(),
 				user.getRole());

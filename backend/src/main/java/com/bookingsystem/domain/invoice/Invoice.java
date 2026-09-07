@@ -6,6 +6,7 @@ import java.time.Instant;
 public class Invoice {
 
 	private Long id;
+	private Long organizationId;
 	private Long bookingId;
 	private Long userId;
 	private BigDecimal amount;
@@ -21,6 +22,7 @@ public class Invoice {
 
 	public Invoice(
 			Long id,
+			Long organizationId,
 			Long bookingId,
 			Long userId,
 			BigDecimal amount,
@@ -31,6 +33,7 @@ public class Invoice {
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
+		this.organizationId = organizationId;
 		this.bookingId = bookingId;
 		this.userId = userId;
 		this.amount = amount;
@@ -48,6 +51,14 @@ public class Invoice {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Long getBookingId() {

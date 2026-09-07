@@ -67,7 +67,7 @@ class BookingServiceTest {
 
 		stubActiveResource("A101", resource("A101", 0));
 
-		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
+		assertThatThrownBy(() -> bookingService.createBooking(1L, 1L, command))
 				.isInstanceOf(InvalidBookingDatesException.class);
 	}
 
@@ -78,9 +78,9 @@ class BookingServiceTest {
 				LocalDateTime.of(2026, 9, 10, 10, 0),
 				LocalDateTime.of(2026, 9, 10, 12, 0));
 
-		when(resourceService.isActiveResource("Z999")).thenReturn(false);
+		when(resourceService.isActiveResource("Z999", 1L)).thenReturn(false);
 
-		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
+		assertThatThrownBy(() -> bookingService.createBooking(1L, 1L, command))
 				.isInstanceOf(InvalidResourceException.class)
 				.hasMessageContaining("Z999");
 	}
@@ -94,7 +94,7 @@ class BookingServiceTest {
 
 		stubActiveResource("A101", resource("A101", 0));
 
-		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
+		assertThatThrownBy(() -> bookingService.createBooking(1L, 1L, command))
 				.isInstanceOf(StayRuleViolationException.class)
 				.hasMessageContaining("at least 30 minutes");
 	}
@@ -115,7 +115,7 @@ class BookingServiceTest {
 						ArgumentMatchers.eq(BLOCKING)))
 				.thenReturn(true);
 
-		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
+		assertThatThrownBy(() -> bookingService.createBooking(1L, 1L, command))
 				.isInstanceOf(BookingConflictException.class)
 				.hasMessageContaining("A101");
 
@@ -135,6 +135,7 @@ class BookingServiceTest {
 	void getBookings_mapsEntitiesToDomain() {
 		BookingEntity entity = org.mockito.Mockito.mock(BookingEntity.class);
 		Booking booking = new Booking(
+				1L,
 				1L,
 				7L,
 				"A101",
@@ -165,6 +166,7 @@ class BookingServiceTest {
 		BookingEntity entity = org.mockito.Mockito.mock(BookingEntity.class);
 		Booking saved = new Booking(
 				10L,
+				1L,
 				7L,
 				"A101",
 				command.startDate(),
@@ -187,7 +189,7 @@ class BookingServiceTest {
 		when(bookingRepository.save(entity)).thenReturn(entity);
 		when(bookingMapper.toDomain(entity)).thenReturn(saved);
 
-		Booking result = bookingService.createBooking(7L, command);
+		Booking result = bookingService.createBooking(7L, 1L, command);
 
 		assertThat(result.getId()).isEqualTo(10L);
 		assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
@@ -208,6 +210,7 @@ class BookingServiceTest {
 		BookingEntity existing = org.mockito.Mockito.mock(BookingEntity.class);
 		Booking updated = new Booking(
 				5L,
+				1L,
 				7L,
 				"B202",
 				command.startDate(),
@@ -231,7 +234,7 @@ class BookingServiceTest {
 		when(bookingRepository.save(existing)).thenReturn(existing);
 		when(bookingMapper.toDomain(existing)).thenReturn(updated);
 
-		Booking result = bookingService.updateBooking(5L, 7L, command);
+		Booking result = bookingService.updateBooking(5L, 7L, 1L, command);
 
 		assertThat(result.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
 		verify(existing).setResourceId("B202");
@@ -267,20 +270,24 @@ class BookingServiceTest {
 						ArgumentMatchers.eq(BLOCKING)))
 				.thenReturn(true);
 
-		assertThatThrownBy(() -> bookingService.updateBooking(5L, 7L, command))
+		assertThatThrownBy(() -> bookingService.updateBooking(5L, 7L, 1L, command))
 				.isInstanceOf(BookingConflictException.class);
 
 		verify(bookingRepository, never()).save(any());
 	}
 
 	private void stubActiveResource(String id, Resource resource) {
-		when(resourceService.isActiveResource(id)).thenReturn(true);
-		when(resourceService.getResource(id)).thenReturn(resource);
+		when(resourceService.isActiveResource(id, 1L)).thenReturn(true);
+		when(resourceService.getResource(id, 1L)).thenReturn(resource);
+		org.mockito.Mockito.lenient()
+				.when(resourceService.hasBlackoutOverlap(eq(id), any(), any()))
+				.thenReturn(false);
 	}
 
 	private Resource resource(String id, int bufferMinutes) {
 		return new Resource(
 				id,
+				1L,
 				id,
 				null,
 				ResourceType.MEETING_ROOM,
@@ -290,6 +297,8 @@ class BookingServiceTest {
 				30,
 				480,
 				bufferMinutes,
+				java.time.LocalTime.of(8, 0),
+				java.time.LocalTime.of(20, 0),
 				Instant.now(),
 				Instant.now());
 	}

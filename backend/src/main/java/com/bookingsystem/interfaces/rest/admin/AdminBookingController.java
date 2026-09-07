@@ -3,7 +3,9 @@ package com.bookingsystem.interfaces.rest.admin;
 import com.bookingsystem.application.booking.BookingService;
 import com.bookingsystem.domain.booking.Booking;
 import com.bookingsystem.domain.booking.BookingStatus;
+import com.bookingsystem.infrastructure.security.AuthenticatedUser;
 import java.util.List;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,9 +23,10 @@ public class AdminBookingController {
 
 	@GetMapping
 	public List<Booking> listBookings(
+			@AuthenticationPrincipal AuthenticatedUser currentUser,
 			@RequestParam(required = false) BookingStatus status,
 			@RequestParam(required = false) String resourceId,
 			@RequestParam(required = false) Long userId) {
-		return bookingService.listAll(status, resourceId, userId);
+		return bookingService.listAll(currentUser.getOrganizationId(), status, resourceId, userId);
 	}
 }

@@ -58,6 +58,12 @@ export class BookingService {
     return this.http.post<Invoice>(apiUrl(`/bookings/${bookingId}/pay`), {});
   }
 
+  downloadInvoicePdf(bookingId: number): Observable<Blob> {
+    return this.http.get(apiUrl(`/bookings/${bookingId}/invoice/pdf`), {
+      responseType: 'blob',
+    });
+  }
+
   getResources(): Observable<Resource[]> {
     return this.http.get<Resource[]>(apiUrl('/resources'));
   }

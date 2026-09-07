@@ -120,7 +120,7 @@ class NotificationApiTest {
 	}
 
 	private String[] nextWindow() {
-		LocalDateTime start = LocalDateTime.of(2028, 3, 1, 9, 0).plusHours(SLOT.getAndIncrement() * 3L);
+		LocalDateTime start = LocalDateTime.of(2028, 3, 1, 10, 0).plusDays(SLOT.getAndIncrement());
 		return new String[] { start.format(DATE_TIME), start.plusHours(2).format(DATE_TIME) };
 	}
 }

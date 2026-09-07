@@ -5,6 +5,7 @@ import com.bookingsystem.application.notification.NotificationService;
 import com.bookingsystem.application.resource.ResourceService;
 import com.bookingsystem.domain.booking.Booking;
 import com.bookingsystem.domain.booking.BookingStatus;
+import com.bookingsystem.domain.resource.OperatingHours;
 import com.bookingsystem.domain.resource.Pricing;
 import com.bookingsystem.domain.resource.Resource;
 import com.bookingsystem.domain.resource.StayRules;
@@ -57,9 +58,9 @@ public class BookingService {
 				.toList();
 	}
 
-	public List<Booking> listAll(BookingStatus status, String resourceId, Long userId) {
+	public List<Booking> listAll(Long organizationId, BookingStatus status, String resourceId, Long userId) {
 		String resourceFilter = resourceId == null || resourceId.isBlank() ? null : resourceId.trim();
-		return bookingRepository.search(status, resourceFilter, userId).stream()
+		return bookingRepository.search(organizationId, status, resourceFilter, userId).stream()
 				.map(bookingMapper::toDomain)
 				.toList();
 	}
@@ -70,9 +71,9 @@ public class BookingService {
 				.orElseThrow(() -> new BookingNotFoundException(id));
 	}
 
-	public Booking getBooking(Long id, Long userId, boolean admin) {
+	public Booking getBooking(Long id, Long userId, Long organizationId, boolean admin) {
 		if (admin) {
-			return bookingRepository.findById(id)
+			return bookingRepository.findByIdAndOrganizationId(id, organizationId)
 					.map(bookingMapper::toDomain)
 					.orElseThrow(() -> new BookingNotFoundException(id));
 		}
@@ -80,11 +81,13 @@ public class BookingService {
 	}
 
 	@Transactional
-	public Booking createBooking(Long userId, CreateBookingCommand command) {
-		Resource resource = requireActiveResource(command.resourceId());
+	public Booking createBooking(Long userId, Long organizationId, CreateBookingCommand command) {
+		Resource resource = requireActiveResource(command.resourceId(), organizationId);
 		validateDateRange(command.startDate(), command.endDate());
 		validateStayRules(resource, command.startDate(), command.endDate());
+		validateSchedule(resource, command.startDate(), command.endDate());
 		ensureResourceAvailable(resource, command.startDate(), command.endDate(), null);
+		ensureNoBlackout(resource, command.startDate(), command.endDate());
 
 		BigDecimal totalAmount = Pricing.totalAmount(
 				command.startDate(),
@@ -93,6 +96,7 @@ public class BookingService {
 		Instant now = Instant.now();
 		Booking booking = new Booking(
 				null,
+				organizationId,
 				userId,
 				command.resourceId(),
 				command.startDate(),
@@ -110,10 +114,11 @@ public class BookingService {
 	}
 
 	@Transactional
-	public Booking updateBooking(Long id, Long userId, UpdateBookingCommand command) {
-		Resource resource = requireActiveResource(command.resourceId());
+	public Booking updateBooking(Long id, Long userId, Long organizationId, UpdateBookingCommand command) {
+		Resource resource = requireActiveResource(command.resourceId(), organizationId);
 		validateDateRange(command.startDate(), command.endDate());
 		validateStayRules(resource, command.startDate(), command.endDate());
+		validateSchedule(resource, command.startDate(), command.endDate());
 
 		BookingEntity existing = bookingRepository.findByIdAndUserId(id, userId)
 				.orElseThrow(() -> new BookingNotFoundException(id));
@@ -122,6 +127,7 @@ public class BookingService {
 		invoiceService.requirePaidForConfirm(id, command.status());
 
 		ensureResourceAvailable(resource, command.startDate(), command.endDate(), id);
+		ensureNoBlackout(resource, command.startDate(), command.endDate());
 
 		BigDecimal totalAmount = Pricing.totalAmount(
 				command.startDate(),
@@ -142,11 +148,11 @@ public class BookingService {
 		return saved;
 	}
 
-	private Resource requireActiveResource(String resourceId) {
-		if (!resourceService.isActiveResource(resourceId)) {
+	private Resource requireActiveResource(String resourceId, Long organizationId) {
+		if (!resourceService.isActiveResource(resourceId, organizationId)) {
 			throw new InvalidResourceException(resourceId);
 		}
-		return resourceService.getResource(resourceId);
+		return resourceService.getResource(resourceId, organizationId);
 	}
 
 	private void validateDateRange(LocalDateTime startDate, LocalDateTime endDate) {
@@ -164,6 +170,24 @@ public class BookingService {
 					resource.getMaxDurationMinutes());
 		} catch (IllegalArgumentException ex) {
 			throw new StayRuleViolationException(ex.getMessage());
+		}
+	}
+
+	private void validateSchedule(Resource resource, LocalDateTime startDate, LocalDateTime endDate) {
+		try {
+			OperatingHours.validateBooking(
+					startDate,
+					endDate,
+					resource.getOpenTime(),
+					resource.getCloseTime());
+		} catch (IllegalArgumentException ex) {
+			throw new ScheduleViolationException(ex.getMessage());
+		}
+	}
+
+	private void ensureNoBlackout(Resource resource, LocalDateTime startDate, LocalDateTime endDate) {
+		if (resourceService.hasBlackoutOverlap(resource.getId(), startDate, endDate)) {
+			throw new BlackoutConflictException(resource.getId());
 		}
 	}
 

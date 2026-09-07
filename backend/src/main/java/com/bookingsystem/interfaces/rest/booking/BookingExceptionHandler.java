@@ -1,9 +1,11 @@
 package com.bookingsystem.interfaces.rest.booking;
 
+import com.bookingsystem.application.booking.BlackoutConflictException;
 import com.bookingsystem.application.booking.BookingConflictException;
 import com.bookingsystem.application.booking.BookingNotFoundException;
 import com.bookingsystem.application.booking.InvalidBookingDatesException;
 import com.bookingsystem.application.booking.InvalidResourceException;
+import com.bookingsystem.application.booking.ScheduleViolationException;
 import com.bookingsystem.application.booking.StayRuleViolationException;
 import com.bookingsystem.application.invoice.InvoiceNotFoundException;
 import com.bookingsystem.application.invoice.InvalidInvoiceStateException;
@@ -35,6 +37,20 @@ public class BookingExceptionHandler {
 		return ResponseEntity
 				.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "STAY_RULE_VIOLATION", ex.getMessage()));
+	}
+
+	@ExceptionHandler(ScheduleViolationException.class)
+	public ResponseEntity<ErrorResponse> handleSchedule(ScheduleViolationException ex) {
+		return ResponseEntity
+				.status(HttpStatus.BAD_REQUEST)
+				.body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "SCHEDULE_VIOLATION", ex.getMessage()));
+	}
+
+	@ExceptionHandler(BlackoutConflictException.class)
+	public ResponseEntity<ErrorResponse> handleBlackout(BlackoutConflictException ex) {
+		return ResponseEntity
+				.status(HttpStatus.CONFLICT)
+				.body(new ErrorResponse(HttpStatus.CONFLICT.value(), "BLACKOUT_CONFLICT", ex.getMessage()));
 	}
 
 	@ExceptionHandler(InvalidInvoiceStateException.class)

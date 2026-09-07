@@ -1,5 +1,8 @@
 package com.bookingsystem.application.user;
 
+import com.bookingsystem.application.organization.InvalidOrganizationRegistrationException;
+import com.bookingsystem.application.organization.OrganizationService;
+import com.bookingsystem.domain.organization.Organization;
 import com.bookingsystem.domain.user.User;
 import com.bookingsystem.domain.user.UserRole;
 import com.bookingsystem.infrastructure.user.UserMapper;
@@ -15,14 +18,17 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final UserMapper userMapper;
 	private final PasswordEncoder passwordEncoder;
+	private final OrganizationService organizationService;
 
 	public UserService(
 			UserRepository userRepository,
 			UserMapper userMapper,
-			PasswordEncoder passwordEncoder) {
+			PasswordEncoder passwordEncoder,
+			OrganizationService organizationService) {
 		this.userRepository = userRepository;
 		this.userMapper = userMapper;
 		this.passwordEncoder = passwordEncoder;
+		this.organizationService = organizationService;
 	}
 
 	@Transactional
@@ -31,13 +37,31 @@ public class UserService {
 			throw new UserAlreadyExistsException(command.email());
 		}
 
+		boolean createOrg = hasText(command.organizationName());
+		boolean joinOrg = hasText(command.organizationSlug());
+		if (createOrg == joinOrg) {
+			throw new InvalidOrganizationRegistrationException(
+					"Provide either organizationName (create) or organizationSlug (join)");
+		}
+
+		Organization organization;
+		UserRole role;
+		if (createOrg) {
+			organization = organizationService.create(command.organizationName());
+			role = UserRole.ADMIN;
+		} else {
+			organization = organizationService.getBySlug(command.organizationSlug());
+			role = UserRole.USER;
+		}
+
 		Instant now = Instant.now();
 		User user = new User(
 				null,
+				organization.getId(),
 				command.email().toLowerCase().trim(),
 				passwordEncoder.encode(command.password()),
 				command.fullName().trim(),
-				UserRole.USER,
+				role,
 				now,
 				now);
 
@@ -60,5 +84,9 @@ public class UserService {
 		return userRepository.findById(id)
 				.map(userMapper::toDomain)
 				.orElseThrow(() -> new UserNotFoundException(id));
+	}
+
+	private static boolean hasText(String value) {
+		return value != null && !value.isBlank();
 	}
 }

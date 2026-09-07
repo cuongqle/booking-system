@@ -64,7 +64,7 @@ class BookingApiTest {
 	@Test
 	void createBooking_shorterThanMinDuration_returnsBadRequest() throws Exception {
 		String token = AuthTestSupport.registerAndGetToken(mockMvc);
-		LocalDateTime start = LocalDateTime.of(2027, 6, 1, 8, 0).plusHours(SLOT.getAndIncrement() * 3L);
+		LocalDateTime start = LocalDateTime.of(2027, 6, 1, 10, 0).plusDays(SLOT.getAndIncrement());
 
 		mockMvc.perform(post("/api/v1/bookings")
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -328,7 +328,7 @@ class BookingApiTest {
 	}
 
 	private String[] nextWindow() {
-		LocalDateTime start = LocalDateTime.of(2027, 1, 1, 8, 0).plusHours(SLOT.getAndIncrement() * 3L);
+		LocalDateTime start = LocalDateTime.of(2027, 1, 1, 10, 0).plusDays(SLOT.getAndIncrement());
 		return new String[] { start.format(DATE_TIME), start.plusHours(2).format(DATE_TIME) };
 	}
 }

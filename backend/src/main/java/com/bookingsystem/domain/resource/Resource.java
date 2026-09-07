@@ -2,10 +2,12 @@ package com.bookingsystem.domain.resource;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalTime;
 
 public class Resource {
 
 	private String id;
+	private Long organizationId;
 	private String name;
 	private String description;
 	private ResourceType type;
@@ -15,6 +17,8 @@ public class Resource {
 	private int minDurationMinutes;
 	private Integer maxDurationMinutes;
 	private int bufferMinutes;
+	private LocalTime openTime;
+	private LocalTime closeTime;
 	private Instant createdAt;
 	private Instant updatedAt;
 
@@ -23,6 +27,7 @@ public class Resource {
 
 	public Resource(
 			String id,
+			Long organizationId,
 			String name,
 			String description,
 			ResourceType type,
@@ -32,9 +37,12 @@ public class Resource {
 			int minDurationMinutes,
 			Integer maxDurationMinutes,
 			int bufferMinutes,
+			LocalTime openTime,
+			LocalTime closeTime,
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
+		this.organizationId = organizationId;
 		this.name = name;
 		this.description = description;
 		this.type = type;
@@ -44,6 +52,8 @@ public class Resource {
 		this.minDurationMinutes = minDurationMinutes;
 		this.maxDurationMinutes = maxDurationMinutes;
 		this.bufferMinutes = bufferMinutes;
+		this.openTime = openTime;
+		this.closeTime = closeTime;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -54,6 +64,14 @@ public class Resource {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public String getName() {
@@ -126,6 +144,22 @@ public class Resource {
 
 	public void setBufferMinutes(int bufferMinutes) {
 		this.bufferMinutes = bufferMinutes;
+	}
+
+	public LocalTime getOpenTime() {
+		return openTime;
+	}
+
+	public void setOpenTime(LocalTime openTime) {
+		this.openTime = openTime;
+	}
+
+	public LocalTime getCloseTime() {
+		return closeTime;
+	}
+
+	public void setCloseTime(LocalTime closeTime) {
+		this.closeTime = closeTime;
 	}
 
 	public Instant getCreatedAt() {

@@ -21,6 +21,9 @@ public class BookingEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "organization_id", nullable = false)
+	private Long organizationId;
+
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
@@ -58,6 +61,14 @@ public class BookingEntity {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Long getUserId() {

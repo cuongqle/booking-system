@@ -5,6 +5,7 @@ import java.time.Instant;
 public class User {
 
 	private Long id;
+	private Long organizationId;
 	private String email;
 	private String passwordHash;
 	private String fullName;
@@ -17,6 +18,7 @@ public class User {
 
 	public User(
 			Long id,
+			Long organizationId,
 			String email,
 			String passwordHash,
 			String fullName,
@@ -24,6 +26,7 @@ public class User {
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
+		this.organizationId = organizationId;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.fullName = fullName;
@@ -38,6 +41,14 @@ public class User {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public String getEmail() {

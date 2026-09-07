@@ -2,6 +2,7 @@ package com.bookingsystem.application.resource;
 
 import com.bookingsystem.domain.resource.ResourceType;
 import java.math.BigDecimal;
+import java.time.LocalTime;
 
 public record CreateResourceCommand(
 		String id,
@@ -13,5 +14,7 @@ public record CreateResourceCommand(
 		String currency,
 		int minDurationMinutes,
 		Integer maxDurationMinutes,
-		int bufferMinutes) {
+		int bufferMinutes,
+		LocalTime openTime,
+		LocalTime closeTime) {
 }

@@ -9,6 +9,7 @@ public class BookingMapper {
 	public Booking toDomain(BookingEntity entity) {
 		return new Booking(
 				entity.getId(),
+				entity.getOrganizationId(),
 				entity.getUserId(),
 				entity.getResourceId(),
 				entity.getStartDate(),
@@ -23,6 +24,7 @@ public class BookingMapper {
 	public BookingEntity toEntity(Booking booking) {
 		BookingEntity entity = new BookingEntity();
 		entity.setId(booking.getId());
+		entity.setOrganizationId(booking.getOrganizationId());
 		entity.setUserId(booking.getUserId());
 		entity.setResourceId(booking.getResourceId());
 		entity.setStartDate(booking.getStartDate());

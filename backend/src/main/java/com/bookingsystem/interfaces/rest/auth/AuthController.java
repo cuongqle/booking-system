@@ -35,6 +35,9 @@ public class AuthController {
 		return AuthResponse.bearer(
 				result.accessToken(),
 				result.userId(),
+				result.organizationId(),
+				result.organizationName(),
+				result.organizationSlug(),
 				result.email(),
 				result.fullName(),
 				result.role());

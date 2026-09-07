@@ -10,12 +10,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class AuthenticatedUser implements UserDetails {
 
 	private final Long id;
+	private final Long organizationId;
 	private final String email;
 	private final String fullName;
 	private final UserRole role;
 
-	public AuthenticatedUser(Long id, String email, String fullName, UserRole role) {
+	public AuthenticatedUser(Long id, Long organizationId, String email, String fullName, UserRole role) {
 		this.id = id;
+		this.organizationId = organizationId;
 		this.email = email;
 		this.fullName = fullName;
 		this.role = role == null ? UserRole.USER : role;
@@ -23,6 +25,10 @@ public class AuthenticatedUser implements UserDetails {
 
 	public Long getId() {
 		return id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
 	}
 
 	public String getFullName() {

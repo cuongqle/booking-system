@@ -15,6 +15,8 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
 
 	Optional<BookingEntity> findByIdAndUserId(Long id, Long userId);
 
+	Optional<BookingEntity> findByIdAndOrganizationId(Long id, Long organizationId);
+
 	@Query("""
 			SELECT b FROM BookingEntity b
 			WHERE b.userId = :userId
@@ -29,12 +31,14 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
 
 	@Query("""
 			SELECT b FROM BookingEntity b
-			WHERE (:status IS NULL OR b.status = :status)
+			WHERE b.organizationId = :organizationId
+			  AND (:status IS NULL OR b.status = :status)
 			  AND (:resourceId IS NULL OR b.resourceId = :resourceId)
 			  AND (:userId IS NULL OR b.userId = :userId)
 			ORDER BY b.startDate DESC
 			""")
 	List<BookingEntity> search(
+			@Param("organizationId") Long organizationId,
 			@Param("status") BookingStatus status,
 			@Param("resourceId") String resourceId,
 			@Param("userId") Long userId);

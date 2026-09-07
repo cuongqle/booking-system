@@ -1,18 +1,20 @@
-# Harbor — Booking System
+# Hold — Booking System
 
-Harbor is a full-stack generic resource booking app. Authenticated users pick a resource (meeting room, desk, equipment, and more), book a time window, track reservations on a calendar, and update booking status. Overlapping **Pending** or **Confirmed** bookings on the same resource are rejected.
+Hold is a full-stack generic resource booking app. Authenticated users pick a resource (meeting room, desk, equipment, and more), book a time window, track reservations on a calendar, and update booking status. Overlapping **Pending** or **Confirmed** bookings on the same resource are rejected.
 
 ## Features
 
-- Register / sign in with JWT (`USER` by default; `ADMIN` for resource management)
+- Multi-tenant organizations: users belong to a company; resources/bookings/invoices are scoped by org
+- Register / sign in with JWT (`USER` by default; create-org makers become `ADMIN`)
 - Persisted resource catalog with types (`MEETING_ROOM`, `DESK`, `EQUIPMENT`, `OTHER`)
-- Admin resource create/edit (active/inactive)
+- Admin resource create/edit (active/inactive) within their organization
 - Create, view, and edit bookings with start/end date-time
 - Hourly pricing with total amount snapshotted on each booking
 - Stay rules per resource: min/max duration and turnover buffer
+- Operating hours and blackout periods per resource
 - Status workflow: Pending → Confirmed (after payment) → Canceled / Completed
-- Stub invoices: create booking → unpaid invoice; pay confirms booking
-- Users can list their bookings/invoices; admins can list all with filters
+- Stub invoices: create booking → unpaid invoice; pay confirms booking; PDF download
+- Users can list their bookings/invoices; org admins can list all within the org with filters
 - Conflict validation on create and update (includes buffer windows)
 - Month calendar view of your reservations
 - In-app notifications for booking create/update/payment (header bell)
@@ -128,32 +130,39 @@ Base path: `/api/v1`
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| `POST` | `/auth/register` | Public |
-| `POST` | `/auth/login` | Public → JWT |
-| `GET` | `/resources` | Active resources (any authenticated user) |
-| `GET` | `/admin/resources` | All resources (**ADMIN**) |
+| `POST` | `/auth/register` | Public — `organizationName` (create org as ADMIN) **or** `organizationSlug` (join as USER) |
+| `POST` | `/auth/login` | Public → JWT (includes `organizationId` / name / slug) |
+| `GET` | `/resources` | Active resources for caller’s org |
+| `GET` | `/admin/resources` | All org resources (**ADMIN**) |
 | `POST` | `/admin/resources` | Create resource (**ADMIN**) |
-| `PUT` | `/admin/resources/{id}` | Update resource (**ADMIN**) |
+| `PUT` | `/admin/resources/{id}` | Update resource (**ADMIN**; includes `openTime`/`closeTime`) |
+| `GET` | `/admin/resources/{id}/blackouts` | List blackouts (**ADMIN**) |
+| `POST` | `/admin/resources/{id}/blackouts` | Create blackout (**ADMIN**) |
+| `DELETE` | `/admin/resources/{id}/blackouts/{blackoutId}` | Delete blackout (**ADMIN**) |
 | `GET` | `/bookings` | Current user’s bookings (`?status=&resourceId=`) |
-| `POST` | `/bookings` | Create (`PENDING` + unpaid invoice); body uses `resourceId` |
-| `GET` | `/bookings/{id}` | Own booking (admins can open any) |
+| `POST` | `/bookings` | Create (`PENDING` + unpaid invoice); enforces hours/blackouts |
+| `GET` | `/bookings/{id}` | Own booking (org admins can open any in org) |
 | `PUT` | `/bookings/{id}` | Update resource, times, status (`CONFIRMED` requires paid invoice) |
 | `GET` | `/bookings/{id}/invoice` | Invoice for booking |
+| `GET` | `/bookings/{id}/invoice/pdf` | Download invoice PDF |
 | `POST` | `/bookings/{id}/pay` | Stub payment → invoice `PAID`, booking `CONFIRMED` |
 | `GET` | `/invoices` | Current user’s invoices (`?status=`) |
-| `GET` | `/admin/bookings` | All bookings (**ADMIN**; `?status=&resourceId=&userId=`) |
-| `GET` | `/admin/invoices` | All invoices (**ADMIN**; `?status=&userId=&bookingId=`) |
+| `GET` | `/admin/bookings` | Org bookings (**ADMIN**; `?status=&resourceId=&userId=`) |
+| `GET` | `/admin/invoices` | Org invoices (**ADMIN**; `?status=&userId=&bookingId=`) |
 | `GET` | `/notifications` | Current user’s notifications |
 | `GET` | `/notifications/unread-count` | Unread badge count |
 | `POST` | `/notifications/{id}/read` | Mark one read |
 | `POST` | `/notifications/read-all` | Mark all read |
 
-Promote an admin (after register/login once), or use the seeded account from `V6`:
+Seeded demo org (`V11` → `V12`): slug **`hold`**, name **Hold Demo**. Seed admin (`V6`) belongs to it:
 
 | Field | Value |
 | --- | --- |
-| Email | `admin@harbor.com` |
+| Email | `admin@hold.com` |
 | Password | `Admin123!` |
+| Org slug | `hold` |
+
+Promote an admin within an org (after register/login once):
 
 ```sql
 UPDATE users SET role = 'ADMIN' WHERE email = 'you@example.com';

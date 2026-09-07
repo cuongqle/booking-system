@@ -1,4 +1,4 @@
-<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
+<section class="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 fade-up">
   <a class="text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)]" routerLink="/resources">
     ← Back to resources
   </a>
@@ -10,7 +10,7 @@
         {{ editingId() ? 'Edit resource' : 'New resource' }}
       </h1>
       <p class="mt-2 text-sm text-[var(--ink-soft)]">
-        Set pricing and stay rules. Inactive resources stay in history but cannot be newly booked.
+        Set pricing, stay rules, and operating hours. Add blackouts when the resource is unavailable.
       </p>
     </div>
 
@@ -178,6 +178,20 @@
           }
         </label>
 
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Opens</span>
+            <input class="field" type="time" formControlName="openTime" />
+          </label>
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Closes</span>
+            <input class="field" type="time" formControlName="closeTime" />
+          </label>
+        </div>
+        <p class="text-xs text-[var(--ink-soft)]">
+          Leave both empty for 24/7. Overnight schedules are not supported yet.
+        </p>
+
         <label class="flex items-center gap-3 text-sm text-[var(--ink)]">
           <input class="h-4 w-4 accent-[var(--accent)]" type="checkbox" formControlName="active" />
           Active (available for new bookings)
@@ -187,6 +201,70 @@
           {{ submitting() ? 'Saving…' : editingId() ? 'Save changes' : 'Create resource' }}
         </button>
       </form>
+
+      @if (editingId()) {
+        <div class="mt-8 border-t border-[var(--line)] pt-6">
+          <h2 class="display text-xl text-[var(--ink)]">Blackout periods</h2>
+          <p class="mt-1 text-sm text-[var(--ink-soft)]">
+            Block times when this resource cannot be booked.
+          </p>
+
+          @if (blackoutError()) {
+            <p class="alert-error mt-4">{{ blackoutError() }}</p>
+          }
+
+          <form class="mt-4 space-y-3" [formGroup]="blackoutForm" (ngSubmit)="addBlackout()">
+            <div class="grid gap-3 sm:grid-cols-2">
+              <label class="block space-y-1.5">
+                <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
+                <input class="field" type="datetime-local" formControlName="startAt" />
+              </label>
+              <label class="block space-y-1.5">
+                <span class="text-sm font-medium text-[var(--ink-soft)]">End</span>
+                <input class="field" type="datetime-local" formControlName="endAt" />
+              </label>
+            </div>
+            <label class="block space-y-1.5">
+              <span class="text-sm font-medium text-[var(--ink-soft)]">Reason</span>
+              <input
+                class="field"
+                type="text"
+                formControlName="reason"
+                placeholder="Holiday, maintenance…"
+              />
+            </label>
+            <button class="btn btn-ghost" type="submit" [disabled]="blackoutSubmitting()">
+              {{ blackoutSubmitting() ? 'Adding…' : 'Add blackout' }}
+            </button>
+          </form>
+
+          @if (blackouts().length === 0) {
+            <p class="mt-4 text-sm text-[var(--ink-soft)]">No blackouts yet.</p>
+          } @else {
+            <ul class="mt-4 space-y-2">
+              @for (item of blackouts(); track item.id) {
+                <li
+                  class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[var(--line)] px-4 py-3"
+                >
+                  <div class="min-w-0 text-sm">
+                    <p class="font-medium text-[var(--ink)]">
+                      {{ item.startAt | date: 'medium' }} → {{ item.endAt | date: 'medium' }}
+                    </p>
+                    <p class="text-[var(--ink-soft)]">{{ item.reason || 'No reason' }}</p>
+                  </div>
+                  <button
+                    class="btn btn-ghost !px-3 !py-1.5 text-sm"
+                    type="button"
+                    (click)="removeBlackout(item.id)"
+                  >
+                    Remove
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
     }
   </div>
 </section>

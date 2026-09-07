@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.time.LocalTime;
 
 public record UpdateResourceRequest(
 		@NotBlank @Size(max = 255) String name,
@@ -19,7 +20,9 @@ public record UpdateResourceRequest(
 		@NotBlank @Size(min = 3, max = 3) @Pattern(regexp = "[A-Z]{3}") String currency,
 		@NotNull @Min(1) Integer minDurationMinutes,
 		@Min(1) Integer maxDurationMinutes,
-		@NotNull @Min(0) Integer bufferMinutes) {
+		@NotNull @Min(0) Integer bufferMinutes,
+		LocalTime openTime,
+		LocalTime closeTime) {
 
 	public UpdateResourceCommand toCommand() {
 		return new UpdateResourceCommand(
@@ -31,6 +34,8 @@ public record UpdateResourceRequest(
 				currency,
 				minDurationMinutes,
 				maxDurationMinutes,
-				bufferMinutes);
+				bufferMinutes,
+				openTime,
+				closeTime);
 	}
 }

@@ -24,13 +24,16 @@ public class JwtService {
 		this.expirationMs = expirationMs;
 	}
 
-	public String generateToken(User user) {
+	public String generateToken(User user, String organizationName, String organizationSlug) {
 		Date now = new Date();
 		Date expiry = new Date(now.getTime() + expirationMs);
 
 		return Jwts.builder()
 				.subject(user.getEmail())
 				.claim("userId", user.getId())
+				.claim("organizationId", user.getOrganizationId())
+				.claim("organizationName", organizationName)
+				.claim("organizationSlug", organizationSlug)
 				.claim("fullName", user.getFullName())
 				.claim("role", user.getRole().name())
 				.issuedAt(now)
@@ -53,11 +56,21 @@ public class JwtService {
 	}
 
 	public Long extractUserId(String token) {
-		Object userId = parseClaims(token).get("userId");
-		if (userId instanceof Number number) {
-			return number.longValue();
-		}
-		throw new IllegalArgumentException("JWT is missing userId claim");
+		return extractLongClaim(token, "userId");
+	}
+
+	public Long extractOrganizationId(String token) {
+		return extractLongClaim(token, "organizationId");
+	}
+
+	public String extractOrganizationName(String token) {
+		Object value = parseClaims(token).get("organizationName");
+		return value == null ? null : value.toString();
+	}
+
+	public String extractOrganizationSlug(String token) {
+		Object value = parseClaims(token).get("organizationSlug");
+		return value == null ? null : value.toString();
 	}
 
 	public String extractFullName(String token) {
@@ -71,6 +84,14 @@ public class JwtService {
 			return UserRole.USER;
 		}
 		return UserRole.valueOf(role.toString());
+	}
+
+	private Long extractLongClaim(String token, String claim) {
+		Object value = parseClaims(token).get(claim);
+		if (value instanceof Number number) {
+			return number.longValue();
+		}
+		throw new IllegalArgumentException("JWT is missing " + claim + " claim");
 	}
 
 	private Claims parseClaims(String token) {

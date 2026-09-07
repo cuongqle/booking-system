@@ -1,4 +1,9 @@
 package com.bookingsystem.application.user;
 
-public record RegisterUserCommand(String email, String password, String fullName) {
+public record RegisterUserCommand(
+		String email,
+		String password,
+		String fullName,
+		String organizationName,
+		String organizationSlug) {
 }

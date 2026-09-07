@@ -60,6 +60,9 @@
               @if (resource.bufferMinutes > 0) {
                 · {{ resource.bufferMinutes }}m buffer
               }
+              @if (resource.openTime && resource.closeTime) {
+                · open {{ resource.openTime.slice(0, 5) }}–{{ resource.closeTime.slice(0, 5) }}
+              }
             </p>
           }
 

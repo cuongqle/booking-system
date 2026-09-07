@@ -87,16 +87,26 @@
                 </p>
               }
             </div>
-            @if (canPay()) {
+            <div class="flex flex-wrap gap-2">
               <button
                 type="button"
-                class="btn btn-primary"
-                [disabled]="paying()"
-                (click)="pay()"
+                class="btn btn-ghost"
+                [disabled]="downloadingPdf()"
+                (click)="downloadPdf()"
               >
-                {{ paying() ? 'Processing…' : 'Mark as paid (stub)' }}
+                {{ downloadingPdf() ? 'Downloading…' : 'Download PDF' }}
               </button>
-            }
+              @if (canPay()) {
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  [disabled]="paying()"
+                  (click)="pay()"
+                >
+                  {{ paying() ? 'Processing…' : 'Mark as paid (stub)' }}
+                </button>
+              }
+            </div>
           </div>
           @if (payError()) {
             <p class="alert-error mt-4">{{ payError() }}</p>

@@ -1,5 +1,6 @@
 package com.bookingsystem.interfaces.rest.admin;
 
+import com.bookingsystem.application.resource.BlackoutNotFoundException;
 import com.bookingsystem.application.resource.InvalidResourcePolicyException;
 import com.bookingsystem.application.resource.ResourceAlreadyExistsException;
 import com.bookingsystem.application.resource.ResourceNotFoundException;
@@ -17,6 +18,13 @@ public class AdminResourceExceptionHandler {
 		return ResponseEntity
 				.status(HttpStatus.NOT_FOUND)
 				.body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "RESOURCE_NOT_FOUND", ex.getMessage()));
+	}
+
+	@ExceptionHandler(BlackoutNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleBlackoutNotFound(BlackoutNotFoundException ex) {
+		return ResponseEntity
+				.status(HttpStatus.NOT_FOUND)
+				.body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "BLACKOUT_NOT_FOUND", ex.getMessage()));
 	}
 
 	@ExceptionHandler(ResourceAlreadyExistsException.class)

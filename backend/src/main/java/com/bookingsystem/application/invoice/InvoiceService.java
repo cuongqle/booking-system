@@ -12,7 +12,6 @@ import com.bookingsystem.infrastructure.booking.BookingRepository;
 import com.bookingsystem.infrastructure.invoice.InvoiceEntity;
 import com.bookingsystem.infrastructure.invoice.InvoiceMapper;
 import com.bookingsystem.infrastructure.invoice.InvoiceRepository;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -28,18 +27,21 @@ public class InvoiceService {
 	private final BookingRepository bookingRepository;
 	private final BookingMapper bookingMapper;
 	private final NotificationService notificationService;
+	private final InvoicePdfGenerator pdfGenerator;
 
 	public InvoiceService(
 			InvoiceRepository invoiceRepository,
 			InvoiceMapper invoiceMapper,
 			BookingRepository bookingRepository,
 			BookingMapper bookingMapper,
-			NotificationService notificationService) {
+			NotificationService notificationService,
+			InvoicePdfGenerator pdfGenerator) {
 		this.invoiceRepository = invoiceRepository;
 		this.invoiceMapper = invoiceMapper;
 		this.bookingRepository = bookingRepository;
 		this.bookingMapper = bookingMapper;
 		this.notificationService = notificationService;
+		this.pdfGenerator = pdfGenerator;
 	}
 
 	public List<Invoice> listForUser(Long userId, InvoiceStatus status) {
@@ -48,8 +50,8 @@ public class InvoiceService {
 				.toList();
 	}
 
-	public List<Invoice> listAll(InvoiceStatus status, Long userId, Long bookingId) {
-		return invoiceRepository.search(status, userId, bookingId).stream()
+	public List<Invoice> listAll(Long organizationId, InvoiceStatus status, Long userId, Long bookingId) {
+		return invoiceRepository.search(organizationId, status, userId, bookingId).stream()
 				.map(invoiceMapper::toDomain)
 				.toList();
 	}
@@ -60,10 +62,31 @@ public class InvoiceService {
 				.orElseThrow(() -> new InvoiceNotFoundException(bookingId));
 	}
 
+	public Invoice getInvoiceForBooking(Long bookingId, Long organizationId, boolean admin) {
+		if (admin) {
+			return invoiceRepository.findByBookingIdAndOrganizationId(bookingId, organizationId)
+					.map(invoiceMapper::toDomain)
+					.orElseThrow(() -> new InvoiceNotFoundException(bookingId));
+		}
+		throw new IllegalArgumentException("Use getInvoiceForBooking(bookingId, userId) for non-admin");
+	}
+
 	public Invoice getInvoiceForBooking(Long bookingId) {
 		return invoiceRepository.findByBookingId(bookingId)
 				.map(invoiceMapper::toDomain)
 				.orElseThrow(() -> new InvoiceNotFoundException(bookingId));
+	}
+
+	public byte[] renderPdfForBooking(Long bookingId, Long userId, Long organizationId, boolean admin) {
+		BookingEntity bookingEntity = admin
+				? bookingRepository.findByIdAndOrganizationId(bookingId, organizationId)
+						.orElseThrow(() -> new BookingNotFoundException(bookingId))
+				: bookingRepository.findByIdAndUserId(bookingId, userId)
+						.orElseThrow(() -> new BookingNotFoundException(bookingId));
+		Invoice invoice = admin
+				? getInvoiceForBooking(bookingId, organizationId, true)
+				: getInvoiceForBooking(bookingId, userId);
+		return pdfGenerator.generate(invoice, bookingMapper.toDomain(bookingEntity));
 	}
 
 	@Transactional
@@ -71,6 +94,7 @@ public class InvoiceService {
 		Instant now = Instant.now();
 		Invoice invoice = new Invoice(
 				null,
+				booking.getOrganizationId(),
 				booking.getId(),
 				booking.getUserId(),
 				booking.getTotalAmount(),

@@ -9,6 +9,7 @@ public class InvoiceMapper {
 	public Invoice toDomain(InvoiceEntity entity) {
 		return new Invoice(
 				entity.getId(),
+				entity.getOrganizationId(),
 				entity.getBookingId(),
 				entity.getUserId(),
 				entity.getAmount(),
@@ -23,6 +24,7 @@ public class InvoiceMapper {
 	public InvoiceEntity toEntity(Invoice invoice) {
 		InvoiceEntity entity = new InvoiceEntity();
 		entity.setId(invoice.getId());
+		entity.setOrganizationId(invoice.getOrganizationId());
 		entity.setBookingId(invoice.getBookingId());
 		entity.setUserId(invoice.getUserId());
 		entity.setAmount(invoice.getAmount());

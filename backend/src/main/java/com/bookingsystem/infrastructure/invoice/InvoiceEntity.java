@@ -20,6 +20,9 @@ public class InvoiceEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "organization_id", nullable = false)
+	private Long organizationId;
+
 	@Column(name = "booking_id", nullable = false, unique = true)
 	private Long bookingId;
 
@@ -57,6 +60,14 @@ public class InvoiceEntity {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Long getBookingId() {

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class Booking {
 
 	private Long id;
+	private Long organizationId;
 	private Long userId;
 	private String resourceId;
 	private LocalDateTime startDate;
@@ -22,6 +23,7 @@ public class Booking {
 
 	public Booking(
 			Long id,
+			Long organizationId,
 			Long userId,
 			String resourceId,
 			LocalDateTime startDate,
@@ -32,6 +34,7 @@ public class Booking {
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
+		this.organizationId = organizationId;
 		this.userId = userId;
 		this.resourceId = resourceId;
 		this.startDate = startDate;
@@ -49,6 +52,14 @@ public class Booking {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public Long getUserId() {

@@ -29,7 +29,8 @@ class AuthApiTest {
 								{
 								  "email": "%s",
 								  "password": "password1",
-								  "fullName": "Alice"
+								  "fullName": "Alice",
+								  "organizationName": "Alice Co"
 								}
 								""".formatted(email)))
 				.andExpect(status().isCreated())
@@ -37,7 +38,30 @@ class AuthApiTest {
 				.andExpect(jsonPath("$.tokenType").value("Bearer"))
 				.andExpect(jsonPath("$.email").value(email))
 				.andExpect(jsonPath("$.fullName").value("Alice"))
-				.andExpect(jsonPath("$.userId").isNumber());
+				.andExpect(jsonPath("$.userId").isNumber())
+				.andExpect(jsonPath("$.organizationId").isNumber())
+				.andExpect(jsonPath("$.organizationName").value("Alice Co"))
+				.andExpect(jsonPath("$.organizationSlug").value("alice-co"))
+				.andExpect(jsonPath("$.role").value("ADMIN"));
+	}
+
+	@Test
+	void register_joinHold_returnsUserRole() throws Exception {
+		String email = AuthTestSupport.uniqueEmail();
+
+		mockMvc.perform(post("/api/v1/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "email": "%s",
+								  "password": "password1",
+								  "fullName": "Bob",
+								  "organizationSlug": "hold"
+								}
+								""".formatted(email)))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.role").value("USER"))
+				.andExpect(jsonPath("$.organizationSlug").value("hold"));
 	}
 
 	@Test
@@ -51,11 +75,27 @@ class AuthApiTest {
 								{
 								  "email": "%s",
 								  "password": "password1",
-								  "fullName": "Alice Again"
+								  "fullName": "Alice Again",
+								  "organizationSlug": "hold"
 								}
 								""".formatted(email)))
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.code").value("USER_ALREADY_EXISTS"));
+	}
+
+	@Test
+	void register_missingOrganization_returnsBadRequest() throws Exception {
+		mockMvc.perform(post("/api/v1/auth/register")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "email": "%s",
+								  "password": "password1",
+								  "fullName": "No Org"
+								}
+								""".formatted(AuthTestSupport.uniqueEmail())))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_ORGANIZATION"));
 	}
 
 	@Test
@@ -88,7 +128,8 @@ class AuthApiTest {
 								""".formatted(email)))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.accessToken").isNotEmpty())
-				.andExpect(jsonPath("$.email").value(email));
+				.andExpect(jsonPath("$.email").value(email))
+				.andExpect(jsonPath("$.organizationSlug").value("hold"));
 	}
 
 	@Test

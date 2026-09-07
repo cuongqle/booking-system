@@ -19,6 +19,9 @@ public class UserEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "organization_id", nullable = false)
+	private Long organizationId;
+
 	@Column(nullable = false, unique = true)
 	private String email;
 
@@ -47,6 +50,14 @@ public class UserEntity {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public String getEmail() {

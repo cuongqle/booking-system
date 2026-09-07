@@ -45,14 +45,18 @@ class AdminResourceApiTest {
 								  "currency": "USD",
 								  "minDurationMinutes": 30,
 								  "maxDurationMinutes": 240,
-								  "bufferMinutes": 0
+								  "bufferMinutes": 0,
+								  "openTime": "08:00:00",
+								  "closeTime": "18:00:00"
 								}
 								""".formatted(resourceId)))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.id").value(resourceId))
 				.andExpect(jsonPath("$.type").value("DESK"))
 				.andExpect(jsonPath("$.pricePerHour").value(15.00))
-				.andExpect(jsonPath("$.minDurationMinutes").value(30));
+				.andExpect(jsonPath("$.minDurationMinutes").value(30))
+				.andExpect(jsonPath("$.openTime").value("08:00:00"))
+				.andExpect(jsonPath("$.closeTime").value("18:00:00"));
 
 		mockMvc.perform(put("/api/v1/admin/resources/{id}", resourceId)
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
@@ -67,14 +71,35 @@ class AdminResourceApiTest {
 								  "currency": "USD",
 								  "minDurationMinutes": 60,
 								  "maxDurationMinutes": 180,
-								  "bufferMinutes": 10
+								  "bufferMinutes": 10,
+								  "openTime": "09:00:00",
+								  "closeTime": "17:00:00"
 								}
 								"""))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value("Test Desk Updated"))
 				.andExpect(jsonPath("$.active").value(false))
 				.andExpect(jsonPath("$.pricePerHour").value(18.50))
-				.andExpect(jsonPath("$.bufferMinutes").value(10));
+				.andExpect(jsonPath("$.bufferMinutes").value(10))
+				.andExpect(jsonPath("$.openTime").value("09:00:00"));
+
+		mockMvc.perform(post("/api/v1/admin/resources/{id}/blackouts", resourceId)
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "startAt": "2032-01-01T00:00:00",
+								  "endAt": "2032-01-02T00:00:00",
+								  "reason": "Holiday"
+								}
+								"""))
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.reason").value("Holiday"));
+
+		mockMvc.perform(get("/api/v1/admin/resources/{id}/blackouts", resourceId)
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(1));
 
 		mockMvc.perform(get("/api/v1/admin/resources")
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))

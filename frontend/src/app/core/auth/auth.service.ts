@@ -9,15 +9,25 @@ const USER_KEY = 'booking.user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly tokenSignal = signal<string | null>(this.readToken());
-  private readonly userSignal = signal<AuthUser | null>(this.readUser());
+  private readonly tokenSignal = signal<string | null>(null);
+  private readonly userSignal = signal<AuthUser | null>(null);
 
   readonly token = this.tokenSignal.asReadonly();
   readonly currentUser = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.tokenSignal());
   readonly isAdmin = computed(() => this.userSignal()?.role === 'ADMIN');
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {
+    const user = this.readUser();
+    const token = this.readToken();
+    if (user && token) {
+      this.tokenSignal.set(token);
+      this.userSignal.set(user);
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+    }
+  }
 
   register(payload: RegisterRequest): Observable<AuthResponse> {
     return this.http
@@ -41,6 +51,9 @@ export class AuthService {
   private persistSession(response: AuthResponse): void {
     const user: AuthUser = {
       userId: response.userId,
+      organizationId: response.organizationId,
+      organizationName: response.organizationName,
+      organizationSlug: response.organizationSlug,
       email: response.email,
       fullName: response.fullName,
       role: response.role ?? 'USER',
@@ -62,8 +75,14 @@ export class AuthService {
     }
     try {
       const parsed = JSON.parse(raw) as AuthUser & { role?: UserRole };
+      if (parsed.organizationId == null || !parsed.organizationName) {
+        return null;
+      }
       return {
         userId: parsed.userId,
+        organizationId: parsed.organizationId,
+        organizationName: parsed.organizationName,
+        organizationSlug: parsed.organizationSlug,
         email: parsed.email,
         fullName: parsed.fullName,
         role: parsed.role ?? 'USER',

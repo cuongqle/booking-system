@@ -1,52 +1,81 @@
-<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
-  <div class="panel p-6 sm:p-8">
-    <div>
-      <p class="text-sm font-medium text-[var(--accent-deep)]">New here</p>
-      <h1 class="display mt-1 text-3xl text-[var(--ink)]">Create account</h1>
-      <p class="mt-2 text-sm text-[var(--ink-soft)]">One account, all your resource reservations.</p>
+<section class="auth-card mx-auto w-full max-w-lg px-4 sm:px-6 fade-up">
+  <div class="panel auth-card__panel">
+    <div class="auth-card__intro">
+      <p class="auth-card__kicker">
+        {{ mode() === 'create' ? 'New workspace' : 'Join a workspace' }}
+      </p>
+      <h1 class="display auth-card__title">Create account</h1>
+      <p class="auth-card__lede">
+        @if (mode() === 'create') {
+          You’ll be the admin—share the slug with your team afterward.
+        } @else {
+          Enter your company’s slug, then set up your login.
+        }
+      </p>
     </div>
 
     @if (error()) {
-      <p class="alert-error mt-5">{{ error() }}</p>
+      <p class="alert-error auth-card__alert">{{ error() }}</p>
     }
 
-    <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
-      <label class="block space-y-1.5">
-        <span class="text-sm font-medium text-[var(--ink-soft)]">Full name</span>
-        <input
-          class="field"
-          type="text"
-          formControlName="fullName"
-          autocomplete="name"
-          [class.field--invalid]="showError(form.controls.fullName)"
-        />
-        @if (errorMessage(form.controls.fullName, { required: 'Full name is required' }); as message) {
-          <p class="field-error">{{ message }}</p>
-        }
-      </label>
+    <div class="auth-card__mode">
+      <button
+        class="auth-card__mode-btn"
+        type="button"
+        [class.is-active]="mode() === 'create'"
+        (click)="setMode('create')"
+      >
+        New company
+      </button>
+      <button
+        class="auth-card__mode-btn"
+        type="button"
+        [class.is-active]="mode() === 'join'"
+        (click)="setMode('join')"
+      >
+        Join company
+      </button>
+    </div>
 
-      <label class="block space-y-1.5">
-        <span class="text-sm font-medium text-[var(--ink-soft)]">Email</span>
-        <input
-          class="field"
-          type="email"
-          formControlName="email"
-          autocomplete="email"
-          [class.field--invalid]="showError(form.controls.email)"
-        />
-        @if (
-          errorMessage(form.controls.email, {
-            required: 'Email is required',
-            email: 'Enter a valid email address',
-          });
-          as message
-        ) {
-          <p class="field-error">{{ message }}</p>
-        }
-      </label>
+    <form class="auth-card__form" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="auth-card__row">
+        <label class="auth-card__field">
+          <span>Full name</span>
+          <input
+            class="field"
+            type="text"
+            formControlName="fullName"
+            autocomplete="name"
+            [class.field--invalid]="showError(form.controls.fullName)"
+          />
+          @if (errorMessage(form.controls.fullName, { required: 'Full name is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
 
-      <label class="block space-y-1.5">
-        <span class="text-sm font-medium text-[var(--ink-soft)]">Password</span>
+        <label class="auth-card__field">
+          <span>Email</span>
+          <input
+            class="field"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            [class.field--invalid]="showError(form.controls.email)"
+          />
+          @if (
+            errorMessage(form.controls.email, {
+              required: 'Email is required',
+              email: 'Enter a valid email address',
+            });
+            as message
+          ) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
+      </div>
+
+      <label class="auth-card__field">
+        <span>Password <em>8+ characters</em></span>
         <input
           class="field"
           type="password"
@@ -54,7 +83,6 @@
           autocomplete="new-password"
           [class.field--invalid]="showError(form.controls.password)"
         />
-        <span class="text-xs text-[var(--ink-soft)]">At least 8 characters</span>
         @if (
           errorMessage(form.controls.password, {
             required: 'Password is required',
@@ -66,19 +94,50 @@
         }
       </label>
 
+      @if (mode() === 'create') {
+        <label class="auth-card__field">
+          <span>Company name</span>
+          <input
+            class="field"
+            type="text"
+            formControlName="organizationName"
+            autocomplete="organization"
+            [class.field--invalid]="showError(form.controls.organizationName)"
+          />
+          @if (errorMessage(form.controls.organizationName, { required: 'Company name is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
+      } @else {
+        <label class="auth-card__field">
+          <span>Company slug <em>demo: hold</em></span>
+          <input
+            class="field"
+            type="text"
+            formControlName="organizationSlug"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="e.g. acme-studio"
+            [class.field--invalid]="showError(form.controls.organizationSlug)"
+          />
+          @if (errorMessage(form.controls.organizationSlug, { required: 'Company slug is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
+      }
+
       <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
-        {{ submitting() ? 'Creating…' : 'Create account' }}
+        @if (submitting()) {
+          {{ mode() === 'create' ? 'Creating…' : 'Joining…' }}
+        } @else {
+          {{ mode() === 'create' ? 'Create workspace' : 'Join workspace' }}
+        }
       </button>
     </form>
 
-    <p class="mt-5 text-sm text-[var(--ink-soft)]">
+    <p class="auth-card__footer">
       Already registered?
-      <a
-        class="font-semibold text-[var(--ink)] underline decoration-[var(--accent)] underline-offset-4"
-        routerLink="/auth/login"
-      >
-        Sign in
-      </a>
+      <a routerLink="/auth/login">Sign in</a>
     </p>
   </div>
 </section>

@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		if (jwtService.isValid(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
 			AuthenticatedUser principal = new AuthenticatedUser(
 					jwtService.extractUserId(token),
+					jwtService.extractOrganizationId(token),
 					jwtService.extractEmail(token),
 					jwtService.extractFullName(token),
 					jwtService.extractRole(token));

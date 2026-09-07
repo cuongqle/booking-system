@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.MvcResult;
 
 public final class AuthTestSupport {
 
+	public static final String HOLD_SLUG = "hold";
+
 	private AuthTestSupport() {
 	}
 
@@ -30,12 +32,14 @@ public final class AuthTestSupport {
 								{
 								  "email": "%s",
 								  "password": "%s",
-								  "fullName": "%s"
+								  "fullName": "%s",
+								  "organizationSlug": "%s"
 								}
-								""".formatted(email, password, fullName)))
+								""".formatted(email, password, fullName, HOLD_SLUG)))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.accessToken").isNotEmpty())
 				.andExpect(jsonPath("$.role").value("USER"))
+				.andExpect(jsonPath("$.organizationSlug").value(HOLD_SLUG))
 				.andReturn();
 
 		return JsonPath.read(result.getResponse().getContentAsString(), "$.accessToken");

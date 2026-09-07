@@ -1,5 +1,7 @@
 package com.bookingsystem.interfaces.rest.auth;
 
+import com.bookingsystem.application.organization.InvalidOrganizationRegistrationException;
+import com.bookingsystem.application.organization.OrganizationNotFoundException;
 import com.bookingsystem.application.user.InvalidCredentialsException;
 import com.bookingsystem.application.user.UserAlreadyExistsException;
 import com.bookingsystem.application.user.UserNotFoundException;
@@ -31,5 +33,22 @@ public class AuthExceptionHandler {
 		return ResponseEntity
 				.status(HttpStatus.NOT_FOUND)
 				.body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "USER_NOT_FOUND", ex.getMessage()));
+	}
+
+	@ExceptionHandler(OrganizationNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleOrganizationNotFound(OrganizationNotFoundException ex) {
+		return ResponseEntity
+				.status(HttpStatus.NOT_FOUND)
+				.body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "ORGANIZATION_NOT_FOUND", ex.getMessage()));
+	}
+
+	@ExceptionHandler(InvalidOrganizationRegistrationException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidOrganization(InvalidOrganizationRegistrationException ex) {
+		return ResponseEntity
+				.status(HttpStatus.BAD_REQUEST)
+				.body(new ErrorResponse(
+						HttpStatus.BAD_REQUEST.value(),
+						"INVALID_ORGANIZATION",
+						ex.getMessage()));
 	}
 }

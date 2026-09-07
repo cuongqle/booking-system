@@ -13,6 +13,8 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, Long> {
 
 	Optional<InvoiceEntity> findByBookingId(Long bookingId);
 
+	Optional<InvoiceEntity> findByBookingIdAndOrganizationId(Long bookingId, Long organizationId);
+
 	@Query("""
 			SELECT i FROM InvoiceEntity i
 			WHERE i.userId = :userId
@@ -25,12 +27,14 @@ public interface InvoiceRepository extends JpaRepository<InvoiceEntity, Long> {
 
 	@Query("""
 			SELECT i FROM InvoiceEntity i
-			WHERE (:status IS NULL OR i.status = :status)
+			WHERE i.organizationId = :organizationId
+			  AND (:status IS NULL OR i.status = :status)
 			  AND (:userId IS NULL OR i.userId = :userId)
 			  AND (:bookingId IS NULL OR i.bookingId = :bookingId)
 			ORDER BY i.createdAt DESC
 			""")
 	List<InvoiceEntity> search(
+			@Param("organizationId") Long organizationId,
 			@Param("status") InvoiceStatus status,
 			@Param("userId") Long userId,
 			@Param("bookingId") Long bookingId);

@@ -9,7 +9,10 @@ import com.bookingsystem.domain.user.UserRole;
 import com.bookingsystem.infrastructure.security.AuthenticatedUser;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,7 +48,8 @@ public class BookingController {
 	public Booking getBooking(
 			@PathVariable Long id,
 			@AuthenticationPrincipal AuthenticatedUser currentUser) {
-		return bookingService.getBooking(id, currentUser.getId(), isAdmin(currentUser));
+		return bookingService.getBooking(
+				id, currentUser.getId(), currentUser.getOrganizationId(), isAdmin(currentUser));
 	}
 
 	@GetMapping("/{id}/invoice")
@@ -53,11 +57,26 @@ public class BookingController {
 			@PathVariable Long id,
 			@AuthenticationPrincipal AuthenticatedUser currentUser) {
 		if (isAdmin(currentUser)) {
-			bookingService.getBooking(id, currentUser.getId(), true);
-			return invoiceService.getInvoiceForBooking(id);
+			bookingService.getBooking(id, currentUser.getId(), currentUser.getOrganizationId(), true);
+			return invoiceService.getInvoiceForBooking(id, currentUser.getOrganizationId(), true);
 		}
 		bookingService.getBooking(id, currentUser.getId());
 		return invoiceService.getInvoiceForBooking(id, currentUser.getId());
+	}
+
+	@GetMapping("/{id}/invoice/pdf")
+	public ResponseEntity<byte[]> downloadInvoicePdf(
+			@PathVariable Long id,
+			@AuthenticationPrincipal AuthenticatedUser currentUser) {
+		byte[] pdf = invoiceService.renderPdfForBooking(
+				id,
+				currentUser.getId(),
+				currentUser.getOrganizationId(),
+				isAdmin(currentUser));
+		return ResponseEntity.ok()
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"invoice-booking-" + id + ".pdf\"")
+				.contentType(MediaType.APPLICATION_PDF)
+				.body(pdf);
 	}
 
 	@PostMapping("/{id}/pay")
@@ -72,7 +91,8 @@ public class BookingController {
 	public Booking createBooking(
 			@Valid @RequestBody CreateBookingRequest request,
 			@AuthenticationPrincipal AuthenticatedUser currentUser) {
-		return bookingService.createBooking(currentUser.getId(), request.toCommand());
+		return bookingService.createBooking(
+				currentUser.getId(), currentUser.getOrganizationId(), request.toCommand());
 	}
 
 	@PutMapping("/{id}")
@@ -80,7 +100,8 @@ public class BookingController {
 			@PathVariable Long id,
 			@Valid @RequestBody UpdateBookingRequest request,
 			@AuthenticationPrincipal AuthenticatedUser currentUser) {
-		return bookingService.updateBooking(id, currentUser.getId(), request.toCommand());
+		return bookingService.updateBooking(
+				id, currentUser.getId(), currentUser.getOrganizationId(), request.toCommand());
 	}
 
 	private static boolean isAdmin(AuthenticatedUser user) {

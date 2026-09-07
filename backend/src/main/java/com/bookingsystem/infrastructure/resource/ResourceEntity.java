@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "resources")
@@ -17,6 +18,9 @@ public class ResourceEntity {
 	@Id
 	@Column(length = 64)
 	private String id;
+
+	@Column(name = "organization_id", nullable = false)
+	private Long organizationId;
 
 	@Column(nullable = false)
 	private String name;
@@ -46,6 +50,12 @@ public class ResourceEntity {
 	@Column(name = "buffer_minutes", nullable = false)
 	private int bufferMinutes;
 
+	@Column(name = "open_time")
+	private LocalTime openTime;
+
+	@Column(name = "close_time")
+	private LocalTime closeTime;
+
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
 
@@ -61,6 +71,14 @@ public class ResourceEntity {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 
 	public String getName() {
@@ -133,6 +151,22 @@ public class ResourceEntity {
 
 	public void setBufferMinutes(int bufferMinutes) {
 		this.bufferMinutes = bufferMinutes;
+	}
+
+	public LocalTime getOpenTime() {
+		return openTime;
+	}
+
+	public void setOpenTime(LocalTime openTime) {
+		this.openTime = openTime;
+	}
+
+	public LocalTime getCloseTime() {
+		return closeTime;
+	}
+
+	public void setCloseTime(LocalTime closeTime) {
+		this.closeTime = closeTime;
 	}
 
 	public Instant getCreatedAt() {
