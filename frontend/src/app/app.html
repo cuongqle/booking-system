@@ -25,6 +25,7 @@
             Bookings
           </a>
           <a class="nav-link" routerLink="/bookings/calendar" routerLinkActive="is-active">Calendar</a>
+          <a class="nav-link" routerLink="/invoices" routerLinkActive="is-active">Invoices</a>
           @if (auth.isAdmin()) {
             <a class="nav-link" routerLink="/resources" routerLinkActive="is-active">Resources</a>
           }
@@ -67,6 +68,7 @@
           <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/bookings/calendar">
             Calendar
           </a>
+          <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/invoices">Invoices</a>
           @if (auth.isAdmin()) {
             <a class="text-[var(--ink)] hover:text-[var(--accent-deep)]" routerLink="/resources">
               Resources

@@ -2,6 +2,64 @@ export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
 export type ResourceType = 'MEETING_ROOM' | 'DESK' | 'EQUIPMENT' | 'OTHER';
 
+export type InvoiceStatus = 'UNPAID' | 'PAID' | 'CANCELLED' | 'REFUNDED';
+
+export interface Invoice {
+  id: number;
+  bookingId: number;
+  userId: number;
+  amount: number;
+  currency: string;
+  status: InvoiceStatus;
+  method: string;
+  paidAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const INVOICE_STATUSES: {
+  value: InvoiceStatus;
+  label: string;
+  chipClass: string;
+}[] = [
+  {
+    value: 'UNPAID',
+    label: 'Unpaid',
+    chipClass: 'status-chip status-chip--pending',
+  },
+  {
+    value: 'PAID',
+    label: 'Paid',
+    chipClass: 'status-chip status-chip--confirmed',
+  },
+  {
+    value: 'CANCELLED',
+    label: 'Canceled',
+    chipClass: 'status-chip status-chip--cancelled',
+  },
+  {
+    value: 'REFUNDED',
+    label: 'Refunded',
+    chipClass: 'status-chip status-chip--completed',
+  },
+];
+
+export function invoiceStatusMeta(status: InvoiceStatus) {
+  return (
+    INVOICE_STATUSES.find((item) => item.value === status) ?? {
+      value: status,
+      label: status,
+      chipClass: 'status-chip',
+    }
+  );
+}
+
+export interface InvoiceListFilters {
+  status?: InvoiceStatus | '';
+  userId?: string;
+  bookingId?: string;
+}
+
 export interface Booking {
   id: number;
   userId: number;

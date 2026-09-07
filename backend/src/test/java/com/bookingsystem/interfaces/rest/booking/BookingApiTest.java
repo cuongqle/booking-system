@@ -158,6 +158,33 @@ class BookingApiTest {
 	}
 
 	@Test
+	void getBookings_filtersByStatusAndResource() throws Exception {
+		String token = AuthTestSupport.registerAndGetToken(mockMvc);
+		Long pendingId = createBooking(token, "A101");
+		Long paidId = createBooking(token, "B201");
+
+		mockMvc.perform(post("/api/v1/bookings/{id}/pay", paidId)
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+				.andExpect(status().isOk());
+
+		mockMvc.perform(get("/api/v1/bookings")
+						.param("status", "PENDING")
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(1))
+				.andExpect(jsonPath("$[0].id").value(pendingId))
+				.andExpect(jsonPath("$[0].status").value("PENDING"));
+
+		mockMvc.perform(get("/api/v1/bookings")
+						.param("resourceId", "B201")
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.length()").value(1))
+				.andExpect(jsonPath("$[0].id").value(paidId))
+				.andExpect(jsonPath("$[0].resourceId").value("B201"));
+	}
+
+	@Test
 	void createBooking_withOverlappingTimes_returnsConflict() throws Exception {
 		String token = AuthTestSupport.registerAndGetToken(mockMvc);
 		String[] window = nextWindow();
@@ -205,6 +232,11 @@ class BookingApiTest {
 		String token = AuthTestSupport.registerAndGetToken(mockMvc);
 		Long bookingId = createBooking(token, "A101");
 		String[] window = nextWindow();
+
+		mockMvc.perform(post("/api/v1/bookings/{id}/pay", bookingId)
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.status").value("PAID"));
 
 		mockMvc.perform(put("/api/v1/bookings/{id}", bookingId)
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)

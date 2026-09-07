@@ -1,4 +1,4 @@
-export type NotificationType = 'BOOKING_CREATED' | 'BOOKING_UPDATED';
+export type NotificationType = 'BOOKING_CREATED' | 'BOOKING_UPDATED' | 'PAYMENT_RECEIVED';
 
 export interface AppNotification {
   id: number;

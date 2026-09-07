@@ -10,10 +10,12 @@ Harbor is a full-stack generic resource booking app. Authenticated users pick a 
 - Create, view, and edit bookings with start/end date-time
 - Hourly pricing with total amount snapshotted on each booking
 - Stay rules per resource: min/max duration and turnover buffer
-- Status workflow: Pending → Confirmed → Canceled / Completed
+- Status workflow: Pending → Confirmed (after payment) → Canceled / Completed
+- Stub invoices: create booking → unpaid invoice; pay confirms booking
+- Users can list their invoices; admins can list all invoices with filters
 - Conflict validation on create and update (includes buffer windows)
 - Month calendar view of your reservations
-- In-app notifications for booking create/update (header bell)
+- In-app notifications for booking create/update/payment (header bell)
 - Field-level form validation on auth and booking screens
 
 ## Project structure
@@ -132,10 +134,14 @@ Base path: `/api/v1`
 | `GET` | `/admin/resources` | All resources (**ADMIN**) |
 | `POST` | `/admin/resources` | Create resource (**ADMIN**) |
 | `PUT` | `/admin/resources/{id}` | Update resource (**ADMIN**) |
-| `GET` | `/bookings` | Current user’s bookings |
-| `POST` | `/bookings` | Create (`PENDING`); body uses `resourceId` |
+| `GET` | `/bookings` | Current user’s bookings (`?status=&resourceId=`) |
+| `POST` | `/bookings` | Create (`PENDING` + unpaid invoice); body uses `resourceId` |
 | `GET` | `/bookings/{id}` | Own booking |
-| `PUT` | `/bookings/{id}` | Update resource, times, status |
+| `PUT` | `/bookings/{id}` | Update resource, times, status (`CONFIRMED` requires paid invoice) |
+| `GET` | `/bookings/{id}/invoice` | Invoice for booking |
+| `POST` | `/bookings/{id}/pay` | Stub payment → invoice `PAID`, booking `CONFIRMED` |
+| `GET` | `/invoices` | Current user’s invoices (`?status=`) |
+| `GET` | `/admin/invoices` | All invoices (**ADMIN**; `?status=&userId=&bookingId=`) |
 | `GET` | `/notifications` | Current user’s notifications |
 | `GET` | `/notifications/unread-count` | Unread badge count |
 | `POST` | `/notifications/{id}/read` | Mark one read |

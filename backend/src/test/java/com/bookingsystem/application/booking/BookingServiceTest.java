@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bookingsystem.application.invoice.InvoiceService;
 import com.bookingsystem.application.notification.NotificationService;
 import com.bookingsystem.application.resource.ResourceService;
 import com.bookingsystem.domain.booking.Booking;
@@ -50,6 +51,9 @@ class BookingServiceTest {
 
 	@Mock
 	private NotificationService notificationService;
+
+	@Mock
+	private InvoiceService invoiceService;
 
 	@InjectMocks
 	private BookingService bookingService;
@@ -142,13 +146,13 @@ class BookingServiceTest {
 				Instant.now(),
 				Instant.now());
 
-		when(bookingRepository.findByUserId(7L)).thenReturn(List.of(entity));
+		when(bookingRepository.findForUser(7L, null, null)).thenReturn(List.of(entity));
 		when(bookingMapper.toDomain(entity)).thenReturn(booking);
 
 		List<Booking> result = bookingService.getBookings(7L);
 
 		assertThat(result).containsExactly(booking);
-		verify(bookingRepository).findByUserId(7L);
+		verify(bookingRepository).findForUser(7L, null, null);
 	}
 
 	@Test
@@ -189,6 +193,7 @@ class BookingServiceTest {
 		assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
 		assertThat(result.getTotalAmount()).isEqualByComparingTo("80.00");
 		verify(bookingRepository).save(entity);
+		verify(invoiceService).createForBooking(saved);
 		verify(notificationService).notifyBookingCreated(saved);
 	}
 
@@ -215,6 +220,7 @@ class BookingServiceTest {
 
 		stubActiveResource("B202", resource("B202", 0));
 		when(bookingRepository.findByIdAndUserId(5L, 7L)).thenReturn(Optional.of(existing));
+		when(existing.getStatus()).thenReturn(BookingStatus.PENDING);
 		when(bookingRepository.existsOverlapping(
 						eq("B202"),
 						eq(command.startDate()),
@@ -235,6 +241,8 @@ class BookingServiceTest {
 		verify(existing).setTotalAmount(new BigDecimal("80.00"));
 		verify(existing).setCurrency("USD");
 		verify(bookingRepository).save(existing);
+		verify(invoiceService).requirePaidForConfirm(5L, BookingStatus.CONFIRMED);
+		verify(invoiceService).syncOnBookingUpdate(updated, BookingStatus.PENDING);
 		verify(notificationService).notifyBookingUpdated(updated);
 	}
 
@@ -250,6 +258,7 @@ class BookingServiceTest {
 
 		stubActiveResource("A101", resource("A101", 0));
 		when(bookingRepository.findByIdAndUserId(5L, 7L)).thenReturn(Optional.of(existing));
+		when(existing.getStatus()).thenReturn(BookingStatus.PENDING);
 		when(bookingRepository.existsOverlapping(
 						eq("A101"),
 						eq(command.startDate()),

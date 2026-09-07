@@ -14,6 +14,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/bookings/bookings.routes').then((m) => m.BOOKINGS_ROUTES),
   },
   {
+    path: 'invoices',
+    loadChildren: () =>
+      import('./features/invoices/invoices.routes').then((m) => m.INVOICES_ROUTES),
+  },
+  {
     path: 'resources',
     loadChildren: () =>
       import('./features/resources/resources.routes').then((m) => m.RESOURCES_ROUTES),

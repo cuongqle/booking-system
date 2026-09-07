@@ -1,33 +1,70 @@
-<section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+<section class="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col px-4 py-4 sm:px-6 sm:py-5 fade-up">
+  <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <p class="text-sm font-medium text-[var(--accent-deep)]">Workspace</p>
-      <h1 class="display mt-1 text-3xl text-[var(--ink)] sm:text-4xl">My bookings</h1>
-      <p class="mt-2 text-[var(--ink-soft)]">Only reservations tied to your signed-in account.</p>
+      <h1 class="display mt-0.5 text-2xl text-[var(--ink)] sm:text-3xl">My bookings</h1>
+      <p class="mt-1 text-sm text-[var(--ink-soft)]">Only reservations tied to your signed-in account.</p>
     </div>
     <div class="flex flex-wrap gap-2">
-      <a class="btn btn-ghost" routerLink="/bookings/calendar">Calendar</a>
-      <a class="btn btn-primary self-start sm:self-auto" routerLink="/bookings/new">New booking</a>
+      <a class="btn btn-ghost !px-3 !py-1.5 text-sm" routerLink="/bookings/calendar">Calendar</a>
+      <a class="btn btn-primary !px-3 !py-1.5 text-sm" routerLink="/bookings/new">New booking</a>
+    </div>
+  </div>
+
+  <div class="panel mt-4 shrink-0 px-5 py-4 sm:px-6">
+    <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+      <label class="block min-w-[10rem] flex-1 space-y-1.5">
+        <span class="text-sm font-medium text-[var(--ink-soft)]">Status</span>
+        <select
+          class="field"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="statusFilter.set($event)"
+        >
+          <option value="">All statuses</option>
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="block min-w-[12rem] flex-1 space-y-1.5">
+        <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
+        <select
+          class="field"
+          [ngModel]="resourceFilter()"
+          (ngModelChange)="resourceFilter.set($event)"
+        >
+          <option value="">All resources</option>
+          @for (resource of resources(); track resource.id) {
+            <option [value]="resource.id">{{ resource.id }} — {{ resource.name }}</option>
+          }
+        </select>
+      </label>
+
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-primary" type="button" (click)="applyFilters()">Apply</button>
+        <button class="btn btn-ghost" type="button" (click)="clearFilters()">Clear</button>
+      </div>
     </div>
   </div>
 
   @if (error()) {
-    <p class="alert-error mt-6">{{ error() }}</p>
+    <p class="alert-error mt-3 shrink-0">{{ error() }}</p>
   }
 
-  <div class="mt-8 w-full">
+  <div class="mt-4 min-h-0 flex-1">
     @if (loading()) {
       <p class="text-[var(--ink-soft)]">Loading your bookings…</p>
     } @else if (bookings().length === 0) {
       <div class="panel px-6 py-14 text-center">
-        <p class="display text-2xl text-[var(--ink)]">Nothing booked yet</p>
+        <p class="display text-2xl text-[var(--ink)]">No bookings found</p>
         <p class="mx-auto mt-2 max-w-sm text-sm text-[var(--ink-soft)]">
-          Create your first stay and it will show up here instantly.
+          Try clearing filters, or create a new booking.
         </p>
         <a class="btn btn-primary mt-6" routerLink="/bookings/new">Create booking</a>
       </div>
     } @else {
-      <ul class="panel w-full overflow-hidden">
+      <ul class="panel h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
         @for (booking of bookings(); track booking.id) {
           <li class="border-b border-[var(--line)] last:border-b-0">
             <a

@@ -5,6 +5,8 @@ import com.bookingsystem.application.booking.BookingNotFoundException;
 import com.bookingsystem.application.booking.InvalidBookingDatesException;
 import com.bookingsystem.application.booking.InvalidResourceException;
 import com.bookingsystem.application.booking.StayRuleViolationException;
+import com.bookingsystem.application.invoice.InvoiceNotFoundException;
+import com.bookingsystem.application.invoice.InvalidInvoiceStateException;
 import com.bookingsystem.interfaces.rest.common.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,20 @@ public class BookingExceptionHandler {
 		return ResponseEntity
 				.status(HttpStatus.BAD_REQUEST)
 				.body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "STAY_RULE_VIOLATION", ex.getMessage()));
+	}
+
+	@ExceptionHandler(InvalidInvoiceStateException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidInvoice(InvalidInvoiceStateException ex) {
+		return ResponseEntity
+				.status(HttpStatus.BAD_REQUEST)
+				.body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "INVALID_INVOICE_STATE", ex.getMessage()));
+	}
+
+	@ExceptionHandler(InvoiceNotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleInvoiceNotFound(InvoiceNotFoundException ex) {
+		return ResponseEntity
+				.status(HttpStatus.NOT_FOUND)
+				.body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "INVOICE_NOT_FOUND", ex.getMessage()));
 	}
 
 	@ExceptionHandler(BookingConflictException.class)

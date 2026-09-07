@@ -1,6 +1,7 @@
 package com.bookingsystem.application.notification;
 
 import com.bookingsystem.domain.booking.Booking;
+import com.bookingsystem.domain.invoice.Invoice;
 import com.bookingsystem.domain.notification.Notification;
 import com.bookingsystem.domain.notification.NotificationType;
 import com.bookingsystem.infrastructure.notification.NotificationEntity;
@@ -80,6 +81,21 @@ public class NotificationService {
 								booking.getStatus().name().toLowerCase().replace('_', ' '),
 								RANGE.format(booking.getStartDate()),
 								RANGE.format(booking.getEndDate())),
+				"/bookings/" + booking.getId());
+	}
+
+	@Transactional
+	public void notifyPaymentReceived(Booking booking, Invoice invoice) {
+		create(
+				booking.getUserId(),
+				NotificationType.PAYMENT_RECEIVED,
+				"Payment received",
+				"Stub payment of %s %s confirmed booking #%d for %s."
+						.formatted(
+								invoice.getAmount().toPlainString(),
+								invoice.getCurrency(),
+								booking.getId(),
+								booking.getResourceId()),
 				"/bookings/" + booking.getId());
 	}
 

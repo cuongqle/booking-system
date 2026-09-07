@@ -1,5 +1,6 @@
 package com.bookingsystem.application.booking;
 
+import com.bookingsystem.application.invoice.InvoiceService;
 import com.bookingsystem.application.notification.NotificationService;
 import com.bookingsystem.application.resource.ResourceService;
 import com.bookingsystem.domain.booking.Booking;
@@ -30,20 +31,28 @@ public class BookingService {
 	private final BookingMapper bookingMapper;
 	private final ResourceService resourceService;
 	private final NotificationService notificationService;
+	private final InvoiceService invoiceService;
 
 	public BookingService(
 			BookingRepository bookingRepository,
 			BookingMapper bookingMapper,
 			ResourceService resourceService,
-			NotificationService notificationService) {
+			NotificationService notificationService,
+			InvoiceService invoiceService) {
 		this.bookingRepository = bookingRepository;
 		this.bookingMapper = bookingMapper;
 		this.resourceService = resourceService;
 		this.notificationService = notificationService;
+		this.invoiceService = invoiceService;
 	}
 
 	public List<Booking> getBookings(Long userId) {
-		return bookingRepository.findByUserId(userId).stream()
+		return getBookings(userId, null, null);
+	}
+
+	public List<Booking> getBookings(Long userId, BookingStatus status, String resourceId) {
+		String resourceFilter = resourceId == null || resourceId.isBlank() ? null : resourceId.trim();
+		return bookingRepository.findForUser(userId, status, resourceFilter).stream()
 				.map(bookingMapper::toDomain)
 				.toList();
 	}
@@ -52,6 +61,15 @@ public class BookingService {
 		return bookingRepository.findByIdAndUserId(id, userId)
 				.map(bookingMapper::toDomain)
 				.orElseThrow(() -> new BookingNotFoundException(id));
+	}
+
+	public Booking getBooking(Long id, Long userId, boolean admin) {
+		if (admin) {
+			return bookingRepository.findById(id)
+					.map(bookingMapper::toDomain)
+					.orElseThrow(() -> new BookingNotFoundException(id));
+		}
+		return getBooking(id, userId);
 	}
 
 	@Transactional
@@ -79,6 +97,7 @@ public class BookingService {
 				now);
 
 		Booking saved = bookingMapper.toDomain(bookingRepository.save(bookingMapper.toEntity(booking)));
+		invoiceService.createForBooking(saved);
 		notificationService.notifyBookingCreated(saved);
 		return saved;
 	}
@@ -91,6 +110,9 @@ public class BookingService {
 
 		BookingEntity existing = bookingRepository.findByIdAndUserId(id, userId)
 				.orElseThrow(() -> new BookingNotFoundException(id));
+
+		BookingStatus previousStatus = existing.getStatus();
+		invoiceService.requirePaidForConfirm(id, command.status());
 
 		ensureResourceAvailable(resource, command.startDate(), command.endDate(), id);
 
@@ -108,6 +130,7 @@ public class BookingService {
 		existing.setUpdatedAt(Instant.now());
 
 		Booking saved = bookingMapper.toDomain(bookingRepository.save(existing));
+		invoiceService.syncOnBookingUpdate(saved, previousStatus);
 		notificationService.notifyBookingUpdated(saved);
 		return saved;
 	}

@@ -1,19 +1,46 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { apiUrl } from '../../core/api/api-url';
-import { Booking, BookingUpdateRequest, BookingWriteRequest, Resource } from './booking.models';
+import {
+  Booking,
+  BookingStatus,
+  BookingUpdateRequest,
+  BookingWriteRequest,
+  Invoice,
+  Resource,
+} from './booking.models';
+
+export interface BookingListFilters {
+  status?: BookingStatus | '';
+  resourceId?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
   private readonly http = inject(HttpClient);
 
-  getBookings(): Observable<Booking[]> {
-    return this.http.get<Booking[]>(apiUrl('/bookings'));
+  getBookings(filters: BookingListFilters = {}): Observable<Booking[]> {
+    let params = new HttpParams();
+    if (filters.status) {
+      params = params.set('status', filters.status);
+    }
+    if (filters.resourceId?.trim()) {
+      params = params.set('resourceId', filters.resourceId.trim());
+    }
+    return this.http.get<Booking[]>(apiUrl('/bookings'), { params });
   }
 
   getBooking(id: number): Observable<Booking> {
     return this.http.get<Booking>(apiUrl(`/bookings/${id}`));
+  }
+
+  getInvoice(bookingId: number): Observable<Invoice> {
+    return this.http.get<Invoice>(apiUrl(`/bookings/${bookingId}/invoice`));
+  }
+
+  payBooking(bookingId: number): Observable<Invoice> {
+    return this.http.post<Invoice>(apiUrl(`/bookings/${bookingId}/pay`), {});
   }
 
   getResources(): Observable<Resource[]> {

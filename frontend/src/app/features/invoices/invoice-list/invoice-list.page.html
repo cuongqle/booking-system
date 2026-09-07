@@ -1,0 +1,121 @@
+<section class="mx-auto flex h-full min-h-0 w-full max-w-6xl flex-col px-4 py-4 sm:px-6 sm:py-5 fade-up">
+  <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">Billing</p>
+      <h1 class="display mt-0.5 text-2xl text-[var(--ink)] sm:text-3xl">
+        {{ auth.isAdmin() ? 'All invoices' : 'My invoices' }}
+      </h1>
+      <p class="mt-1 text-sm text-[var(--ink-soft)]">
+        @if (auth.isAdmin()) {
+          Search every invoice by status, user, or booking.
+        } @else {
+          Invoices tied to your bookings.
+        }
+      </p>
+    </div>
+    <a class="btn btn-ghost self-start sm:self-auto" routerLink="/bookings">Bookings</a>
+  </div>
+
+  <div class="panel mt-4 shrink-0 px-5 py-4 sm:px-6">
+    <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
+      <label class="block min-w-[10rem] flex-1 space-y-1.5">
+        <span class="text-sm font-medium text-[var(--ink-soft)]">Status</span>
+        <select
+          class="field"
+          [ngModel]="statusFilter()"
+          (ngModelChange)="statusFilter.set($event)"
+        >
+          <option value="">All statuses</option>
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      @if (auth.isAdmin()) {
+        <label class="block min-w-[8rem] flex-1 space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">User ID</span>
+          <input
+            class="field"
+            type="text"
+            inputmode="numeric"
+            placeholder="Any"
+            [ngModel]="userIdFilter()"
+            (ngModelChange)="userIdFilter.set($event)"
+          />
+        </label>
+        <label class="block min-w-[8rem] flex-1 space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Booking ID</span>
+          <input
+            class="field"
+            type="text"
+            inputmode="numeric"
+            placeholder="Any"
+            [ngModel]="bookingIdFilter()"
+            (ngModelChange)="bookingIdFilter.set($event)"
+          />
+        </label>
+      }
+
+      <div class="flex flex-wrap gap-2">
+        <button class="btn btn-primary" type="button" (click)="applyFilters()">Apply</button>
+        <button class="btn btn-ghost" type="button" (click)="clearFilters()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="alert-error mt-3 shrink-0">{{ error() }}</p>
+  }
+
+  <div class="mt-4 min-h-0 flex-1">
+    @if (loading()) {
+      <p class="text-[var(--ink-soft)]">Loading invoices…</p>
+    } @else if (invoices().length === 0) {
+      <div class="panel px-6 py-14 text-center">
+        <p class="display text-2xl text-[var(--ink)]">No invoices found</p>
+        <p class="mx-auto mt-2 max-w-sm text-sm text-[var(--ink-soft)]">
+          @if (auth.isAdmin()) {
+            Try clearing filters, or wait until bookings create invoices.
+          } @else {
+            Create a booking and its invoice will show up here.
+          }
+        </p>
+        <a class="btn btn-primary mt-6" routerLink="/bookings/new">New booking</a>
+      </div>
+    } @else {
+      <ul class="panel h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
+        @for (invoice of invoices(); track invoice.id) {
+          <li class="border-b border-[var(--line)] last:border-b-0">
+            <a
+              class="list-row flex w-full items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5"
+              [routerLink]="['/bookings', invoice.bookingId]"
+            >
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p class="font-semibold text-[var(--ink)]">Invoice #{{ invoice.id }}</p>
+                  <span [class]="statusMeta(invoice.status).chipClass">
+                    {{ statusMeta(invoice.status).label }}
+                  </span>
+                </div>
+                <p class="mt-1 text-sm text-[var(--ink-soft)]">
+                  Booking #{{ invoice.bookingId }}
+                  @if (auth.isAdmin()) {
+                    · User #{{ invoice.userId }}
+                  }
+                  · {{ invoice.createdAt | date: 'mediumDate' }}
+                  @if (invoice.paidAt) {
+                    · Paid {{ invoice.paidAt | date: 'mediumDate' }}
+                  }
+                </p>
+              </div>
+              <p class="shrink-0 text-sm font-semibold text-[var(--accent-deep)] sm:text-base">
+                {{ formatMoney(invoice.amount, invoice.currency) }}
+              </p>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

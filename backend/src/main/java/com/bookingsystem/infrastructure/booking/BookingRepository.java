@@ -16,6 +16,18 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
 	Optional<BookingEntity> findByIdAndUserId(Long id, Long userId);
 
 	@Query("""
+			SELECT b FROM BookingEntity b
+			WHERE b.userId = :userId
+			  AND (:status IS NULL OR b.status = :status)
+			  AND (:resourceId IS NULL OR b.resourceId = :resourceId)
+			ORDER BY b.startDate DESC
+			""")
+	List<BookingEntity> findForUser(
+			@Param("userId") Long userId,
+			@Param("status") BookingStatus status,
+			@Param("resourceId") String resourceId);
+
+	@Query("""
 			select case when count(b) > 0 then true else false end
 			from BookingEntity b
 			where b.resourceId = :resourceId
