@@ -2,7 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { apiUrl } from '../api/api-url';
-import { AuthResponse, AuthUser, LoginRequest, RegisterRequest } from './auth.models';
+import { AuthResponse, AuthUser, LoginRequest, RegisterRequest, UserRole } from './auth.models';
 
 const TOKEN_KEY = 'booking.accessToken';
 const USER_KEY = 'booking.user';
@@ -15,6 +15,7 @@ export class AuthService {
   readonly token = this.tokenSignal.asReadonly();
   readonly currentUser = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.tokenSignal());
+  readonly isAdmin = computed(() => this.userSignal()?.role === 'ADMIN');
 
   constructor(private readonly http: HttpClient) {}
 
@@ -42,6 +43,7 @@ export class AuthService {
       userId: response.userId,
       email: response.email,
       fullName: response.fullName,
+      role: response.role ?? 'USER',
     };
     localStorage.setItem(TOKEN_KEY, response.accessToken);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
@@ -59,7 +61,13 @@ export class AuthService {
       return null;
     }
     try {
-      return JSON.parse(raw) as AuthUser;
+      const parsed = JSON.parse(raw) as AuthUser & { role?: UserRole };
+      return {
+        userId: parsed.userId,
+        email: parsed.email,
+        fullName: parsed.fullName,
+        role: parsed.role ?? 'USER',
+      };
     } catch {
       return null;
     }

@@ -1,8 +1,21 @@
 package com.bookingsystem.interfaces.rest.auth;
 
-public record AuthResponse(String accessToken, String tokenType, Long userId, String email, String fullName) {
+import com.bookingsystem.domain.user.UserRole;
 
-	public static AuthResponse bearer(String accessToken, Long userId, String email, String fullName) {
-		return new AuthResponse(accessToken, "Bearer", userId, email, fullName);
+public record AuthResponse(
+		String accessToken,
+		String tokenType,
+		Long userId,
+		String email,
+		String fullName,
+		UserRole role) {
+
+	public static AuthResponse bearer(
+			String accessToken,
+			Long userId,
+			String email,
+			String fullName,
+			UserRole role) {
+		return new AuthResponse(accessToken, "Bearer", userId, email, fullName, role);
 	}
 }

@@ -9,11 +9,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.bookingsystem.application.resource.ResourceService;
 import com.bookingsystem.domain.booking.Booking;
 import com.bookingsystem.domain.booking.BookingStatus;
+import com.bookingsystem.domain.resource.Resource;
+import com.bookingsystem.domain.resource.ResourceType;
 import com.bookingsystem.infrastructure.booking.BookingEntity;
 import com.bookingsystem.infrastructure.booking.BookingMapper;
 import com.bookingsystem.infrastructure.booking.BookingRepository;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -40,6 +44,9 @@ class BookingServiceTest {
 	@Mock
 	private BookingMapper bookingMapper;
 
+	@Mock
+	private ResourceService resourceService;
+
 	@InjectMocks
 	private BookingService bookingService;
 
@@ -50,33 +57,52 @@ class BookingServiceTest {
 				LocalDateTime.of(2026, 9, 12, 14, 0),
 				LocalDateTime.of(2026, 9, 10, 10, 0));
 
+		stubActiveResource("A101", resource("A101", 0));
+
 		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
 				.isInstanceOf(InvalidBookingDatesException.class);
 	}
 
 	@Test
-	void createBooking_rejectsUnknownRoom() {
+	void createBooking_rejectsUnknownResource() {
 		CreateBookingCommand command = new CreateBookingCommand(
 				"Z999",
 				LocalDateTime.of(2026, 9, 10, 10, 0),
 				LocalDateTime.of(2026, 9, 10, 12, 0));
 
+		when(resourceService.isActiveResource("Z999")).thenReturn(false);
+
 		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
-				.isInstanceOf(InvalidRoomException.class)
+				.isInstanceOf(InvalidResourceException.class)
 				.hasMessageContaining("Z999");
 	}
 
 	@Test
-	void createBooking_rejectsOverlappingRoom() {
+	void createBooking_rejectsStayRuleViolation() {
+		CreateBookingCommand command = new CreateBookingCommand(
+				"A101",
+				LocalDateTime.of(2026, 9, 10, 10, 0),
+				LocalDateTime.of(2026, 9, 10, 10, 15));
+
+		stubActiveResource("A101", resource("A101", 0));
+
+		assertThatThrownBy(() -> bookingService.createBooking(1L, command))
+				.isInstanceOf(StayRuleViolationException.class)
+				.hasMessageContaining("at least 30 minutes");
+	}
+
+	@Test
+	void createBooking_rejectsOverlappingResource() {
 		CreateBookingCommand command = new CreateBookingCommand(
 				"A101",
 				LocalDateTime.of(2026, 9, 10, 10, 0),
 				LocalDateTime.of(2026, 9, 10, 12, 0));
 
+		stubActiveResource("A101", resource("A101", 15));
 		when(bookingRepository.existsOverlapping(
 						eq("A101"),
-						eq(command.startDate()),
-						eq(command.endDate()),
+						eq(command.startDate().minusMinutes(15)),
+						eq(command.endDate().plusMinutes(15)),
 						isNull(),
 						ArgumentMatchers.eq(BLOCKING)))
 				.thenReturn(true);
@@ -107,6 +133,8 @@ class BookingServiceTest {
 				LocalDateTime.of(2026, 9, 10, 10, 0),
 				LocalDateTime.of(2026, 9, 10, 12, 0),
 				BookingStatus.PENDING,
+				new BigDecimal("80.00"),
+				"USD",
 				Instant.now(),
 				Instant.now());
 
@@ -120,7 +148,7 @@ class BookingServiceTest {
 	}
 
 	@Test
-	void createBooking_persistsPendingBooking() {
+	void createBooking_persistsPendingBookingWithPrice() {
 		CreateBookingCommand command = new CreateBookingCommand(
 				"A101",
 				LocalDateTime.of(2026, 9, 10, 10, 0),
@@ -134,9 +162,12 @@ class BookingServiceTest {
 				command.startDate(),
 				command.endDate(),
 				BookingStatus.PENDING,
+				new BigDecimal("80.00"),
+				"USD",
 				Instant.now(),
 				Instant.now());
 
+		stubActiveResource("A101", resource("A101", 0));
 		when(bookingRepository.existsOverlapping(
 						eq("A101"),
 						eq(command.startDate()),
@@ -152,11 +183,12 @@ class BookingServiceTest {
 
 		assertThat(result.getId()).isEqualTo(10L);
 		assertThat(result.getStatus()).isEqualTo(BookingStatus.PENDING);
+		assertThat(result.getTotalAmount()).isEqualByComparingTo("80.00");
 		verify(bookingRepository).save(entity);
 	}
 
 	@Test
-	void updateBooking_updatesFieldsIncludingStatus() {
+	void updateBooking_updatesFieldsIncludingStatusAndPrice() {
 		UpdateBookingCommand command = new UpdateBookingCommand(
 				"B202",
 				LocalDateTime.of(2026, 10, 1, 9, 0),
@@ -171,9 +203,12 @@ class BookingServiceTest {
 				command.startDate(),
 				command.endDate(),
 				BookingStatus.CONFIRMED,
+				new BigDecimal("80.00"),
+				"USD",
 				Instant.parse("2026-01-01T00:00:00Z"),
 				Instant.now());
 
+		stubActiveResource("B202", resource("B202", 0));
 		when(bookingRepository.findByIdAndUserId(5L, 7L)).thenReturn(Optional.of(existing));
 		when(bookingRepository.existsOverlapping(
 						eq("B202"),
@@ -188,15 +223,17 @@ class BookingServiceTest {
 		Booking result = bookingService.updateBooking(5L, 7L, command);
 
 		assertThat(result.getStatus()).isEqualTo(BookingStatus.CONFIRMED);
-		verify(existing).setRoomId("B202");
+		verify(existing).setResourceId("B202");
 		verify(existing).setStartDate(command.startDate());
 		verify(existing).setEndDate(command.endDate());
 		verify(existing).setStatus(BookingStatus.CONFIRMED);
+		verify(existing).setTotalAmount(new BigDecimal("80.00"));
+		verify(existing).setCurrency("USD");
 		verify(bookingRepository).save(existing);
 	}
 
 	@Test
-	void updateBooking_rejectsOverlappingRoom() {
+	void updateBooking_rejectsOverlappingResource() {
 		UpdateBookingCommand command = new UpdateBookingCommand(
 				"A101",
 				LocalDateTime.of(2026, 9, 11, 10, 0),
@@ -205,6 +242,7 @@ class BookingServiceTest {
 
 		BookingEntity existing = org.mockito.Mockito.mock(BookingEntity.class);
 
+		stubActiveResource("A101", resource("A101", 0));
 		when(bookingRepository.findByIdAndUserId(5L, 7L)).thenReturn(Optional.of(existing));
 		when(bookingRepository.existsOverlapping(
 						eq("A101"),
@@ -218,5 +256,26 @@ class BookingServiceTest {
 				.isInstanceOf(BookingConflictException.class);
 
 		verify(bookingRepository, never()).save(any());
+	}
+
+	private void stubActiveResource(String id, Resource resource) {
+		when(resourceService.isActiveResource(id)).thenReturn(true);
+		when(resourceService.getResource(id)).thenReturn(resource);
+	}
+
+	private Resource resource(String id, int bufferMinutes) {
+		return new Resource(
+				id,
+				id,
+				null,
+				ResourceType.MEETING_ROOM,
+				true,
+				new BigDecimal("40.00"),
+				"USD",
+				30,
+				480,
+				bufferMinutes,
+				Instant.now(),
+				Instant.now());
 	}
 }

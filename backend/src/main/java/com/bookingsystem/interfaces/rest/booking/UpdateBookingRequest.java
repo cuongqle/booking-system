@@ -7,12 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public record UpdateBookingRequest(
-		@NotBlank String roomId,
+		@NotBlank String resourceId,
 		@NotNull LocalDateTime startDate,
 		@NotNull LocalDateTime endDate,
 		@NotNull BookingStatus status) {
 
 	public UpdateBookingCommand toCommand() {
-		return new UpdateBookingCommand(roomId, startDate, endDate, status);
+		return new UpdateBookingCommand(resourceId, startDate, endDate, status);
 	}
 }

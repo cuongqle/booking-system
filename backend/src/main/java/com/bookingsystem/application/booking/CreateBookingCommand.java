@@ -3,7 +3,7 @@ package com.bookingsystem.application.booking;
 import java.time.LocalDateTime;
 
 public record CreateBookingCommand(
-		String roomId,
+		String resourceId,
 		LocalDateTime startDate,
 		LocalDateTime endDate) {
 }

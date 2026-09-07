@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { BookingService } from '../booking.service';
-import { Booking, bookingStatusMeta } from '../booking.models';
+import { Booking, bookingStatusMeta, formatMoney } from '../booking.models';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
 
 @Component({
@@ -19,6 +19,7 @@ export class BookingDetailPage implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly statusMeta = bookingStatusMeta;
+  readonly formatMoney = formatMoney;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));

@@ -35,9 +35,10 @@
               [routerLink]="['/bookings', booking.id]"
             >
               <div>
-                <p class="font-semibold text-[var(--ink)]">Room {{ booking.roomId }}</p>
+                <p class="font-semibold text-[var(--ink)]">{{ booking.resourceId }}</p>
                 <p class="mt-0.5 text-sm text-[var(--ink-soft)]">
                   {{ formatRange(booking.startDate, booking.endDate) }}
+                  · {{ formatMoney(booking.totalAmount, booking.currency) }}
                 </p>
               </div>
               <span [class]="statusMeta(booking.status).chipClass">

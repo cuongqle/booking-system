@@ -1,6 +1,7 @@
 package com.bookingsystem.infrastructure.security;
 
 import com.bookingsystem.domain.user.User;
+import com.bookingsystem.domain.user.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -31,6 +32,7 @@ public class JwtService {
 				.subject(user.getEmail())
 				.claim("userId", user.getId())
 				.claim("fullName", user.getFullName())
+				.claim("role", user.getRole().name())
 				.issuedAt(now)
 				.expiration(expiry)
 				.signWith(secretKey)
@@ -56,6 +58,19 @@ public class JwtService {
 			return number.longValue();
 		}
 		throw new IllegalArgumentException("JWT is missing userId claim");
+	}
+
+	public String extractFullName(String token) {
+		Object fullName = parseClaims(token).get("fullName");
+		return fullName == null ? null : fullName.toString();
+	}
+
+	public UserRole extractRole(String token) {
+		Object role = parseClaims(token).get("role");
+		if (role == null) {
+			return UserRole.USER;
+		}
+		return UserRole.valueOf(role.toString());
 	}
 
 	private Claims parseClaims(String token) {

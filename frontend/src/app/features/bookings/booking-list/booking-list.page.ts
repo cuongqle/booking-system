@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { BookingService } from '../booking.service';
-import { Booking, bookingStatusMeta } from '../booking.models';
+import { Booking, bookingStatusMeta, formatMoney } from '../booking.models';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
 import { formatBookingRange } from '../calendar.utils';
 
@@ -19,6 +19,7 @@ export class BookingListPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly formatRange = formatBookingRange;
   readonly statusMeta = bookingStatusMeta;
+  readonly formatMoney = formatMoney;
 
   ngOnInit(): void {
     this.bookingService.getBookings().subscribe({

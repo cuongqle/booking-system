@@ -6,7 +6,13 @@ export function showControlError(control: AbstractControl | null): boolean {
 
 export function controlErrorMessage(
   control: AbstractControl | null,
-  labels: { required?: string; email?: string; minlength?: string } = {},
+  labels: {
+    required?: string;
+    email?: string;
+    minlength?: string;
+    min?: string;
+    pattern?: string;
+  } = {},
 ): string | null {
   if (!control || !showControlError(control)) {
     return null;
@@ -21,6 +27,13 @@ export function controlErrorMessage(
   if (control.hasError('minlength')) {
     const requiredLength = control.getError('minlength')?.requiredLength as number | undefined;
     return labels.minlength ?? `Must be at least ${requiredLength ?? 8} characters`;
+  }
+  if (control.hasError('min')) {
+    const min = control.getError('min')?.min as number | undefined;
+    return labels.min ?? `Must be at least ${min ?? 0}`;
+  }
+  if (control.hasError('pattern')) {
+    return labels.pattern ?? 'Enter a valid value';
   }
   return 'Invalid value';
 }

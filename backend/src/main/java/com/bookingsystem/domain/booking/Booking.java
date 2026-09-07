@@ -1,5 +1,6 @@
 package com.bookingsystem.domain.booking;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -7,10 +8,12 @@ public class Booking {
 
 	private Long id;
 	private Long userId;
-	private String roomId;
+	private String resourceId;
 	private LocalDateTime startDate;
 	private LocalDateTime endDate;
 	private BookingStatus status;
+	private BigDecimal totalAmount;
+	private String currency;
 	private Instant createdAt;
 	private Instant updatedAt;
 
@@ -20,18 +23,22 @@ public class Booking {
 	public Booking(
 			Long id,
 			Long userId,
-			String roomId,
+			String resourceId,
 			LocalDateTime startDate,
 			LocalDateTime endDate,
 			BookingStatus status,
+			BigDecimal totalAmount,
+			String currency,
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
 		this.userId = userId;
-		this.roomId = roomId;
+		this.resourceId = resourceId;
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.status = status;
+		this.totalAmount = totalAmount;
+		this.currency = currency;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -52,12 +59,12 @@ public class Booking {
 		this.userId = userId;
 	}
 
-	public String getRoomId() {
-		return roomId;
+	public String getResourceId() {
+		return resourceId;
 	}
 
-	public void setRoomId(String roomId) {
-		this.roomId = roomId;
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
 	}
 
 	public LocalDateTime getStartDate() {
@@ -82,6 +89,22 @@ public class Booking {
 
 	public void setStatus(BookingStatus status) {
 		this.status = status;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 	public Instant getCreatedAt() {

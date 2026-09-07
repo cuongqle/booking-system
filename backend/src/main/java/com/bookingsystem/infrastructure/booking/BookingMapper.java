@@ -10,10 +10,12 @@ public class BookingMapper {
 		return new Booking(
 				entity.getId(),
 				entity.getUserId(),
-				entity.getRoomId(),
+				entity.getResourceId(),
 				entity.getStartDate(),
 				entity.getEndDate(),
 				entity.getStatus(),
+				entity.getTotalAmount(),
+				entity.getCurrency(),
 				entity.getCreatedAt(),
 				entity.getUpdatedAt());
 	}
@@ -22,10 +24,12 @@ public class BookingMapper {
 		BookingEntity entity = new BookingEntity();
 		entity.setId(booking.getId());
 		entity.setUserId(booking.getUserId());
-		entity.setRoomId(booking.getRoomId());
+		entity.setResourceId(booking.getResourceId());
 		entity.setStartDate(booking.getStartDate());
 		entity.setEndDate(booking.getEndDate());
 		entity.setStatus(booking.getStatus());
+		entity.setTotalAmount(booking.getTotalAmount());
+		entity.setCurrency(booking.getCurrency());
 		entity.setCreatedAt(booking.getCreatedAt());
 		entity.setUpdatedAt(booking.getUpdatedAt());
 		return entity;

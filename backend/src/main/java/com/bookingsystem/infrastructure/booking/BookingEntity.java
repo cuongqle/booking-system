@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -23,8 +24,8 @@ public class BookingEntity {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
-	@Column(name = "room_id", nullable = false)
-	private String roomId;
+	@Column(name = "resource_id", nullable = false)
+	private String resourceId;
 
 	@Column(name = "start_date", nullable = false)
 	private LocalDateTime startDate;
@@ -35,6 +36,12 @@ public class BookingEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private BookingStatus status;
+
+	@Column(name = "total_amount", nullable = false, precision = 12, scale = 2)
+	private BigDecimal totalAmount;
+
+	@Column(nullable = false, length = 3)
+	private String currency;
 
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
@@ -61,12 +68,12 @@ public class BookingEntity {
 		this.userId = userId;
 	}
 
-	public String getRoomId() {
-		return roomId;
+	public String getResourceId() {
+		return resourceId;
 	}
 
-	public void setRoomId(String roomId) {
-		this.roomId = roomId;
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
 	}
 
 	public LocalDateTime getStartDate() {
@@ -91,6 +98,22 @@ public class BookingEntity {
 
 	public void setStatus(BookingStatus status) {
 		this.status = status;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
 	}
 
 	public Instant getCreatedAt() {

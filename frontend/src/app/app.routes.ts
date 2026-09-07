@@ -13,5 +13,10 @@ export const routes: Routes = [
     path: 'bookings',
     loadChildren: () => import('./features/bookings/bookings.routes').then((m) => m.BOOKINGS_ROUTES),
   },
+  {
+    path: 'resources',
+    loadChildren: () =>
+      import('./features/resources/resources.routes').then((m) => m.RESOURCES_ROUTES),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -8,7 +8,7 @@
       <p class="text-sm font-medium text-[var(--accent-deep)]">Create</p>
       <h1 class="display mt-1 text-3xl text-[var(--ink)]">New booking</h1>
       <p class="mt-2 text-sm text-[var(--ink-soft)]">
-        Pick a room and time window. Overlaps with pending or confirmed stays are blocked.
+        Pick a resource and time window. Stay rules and pricing apply automatically.
       </p>
     </div>
 
@@ -16,26 +16,41 @@
       <p class="alert-error mt-5">{{ error() }}</p>
     }
 
-    @if (loadingRooms()) {
-      <p class="mt-6 text-[var(--ink-soft)]">Loading rooms…</p>
+    @if (loadingResources()) {
+      <p class="mt-6 text-[var(--ink-soft)]">Loading resources…</p>
     } @else {
       <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
         <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Room</span>
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
           <select
             class="field"
-            formControlName="roomId"
-            [class.field--invalid]="showError(form.controls.roomId)"
+            formControlName="resourceId"
+            [class.field--invalid]="showError(form.controls.resourceId)"
           >
-            <option value="" disabled>Select a room</option>
-            @for (room of rooms(); track room.id) {
-              <option [value]="room.id">{{ room.id }} — {{ room.name }}</option>
+            <option value="" disabled>Select a resource</option>
+            @for (resource of resources(); track resource.id) {
+              <option [value]="resource.id">
+                {{ resource.id }} — {{ resource.name }} ({{ typeLabel[resource.type] }}) ·
+                {{ resource.pricePerHour }}/hr
+              </option>
             }
           </select>
-          @if (errorMessage(form.controls.roomId, { required: 'Select a room' }); as message) {
+          @if (errorMessage(form.controls.resourceId, { required: 'Select a resource' }); as message) {
             <p class="field-error">{{ message }}</p>
           }
         </label>
+
+        @if (selectedResource(); as resource) {
+          <p class="text-sm text-[var(--ink-soft)]">
+            Min {{ resource.minDurationMinutes }}m
+            @if (resource.maxDurationMinutes != null) {
+              · max {{ resource.maxDurationMinutes }}m
+            }
+            @if (resource.bufferMinutes > 0) {
+              · {{ resource.bufferMinutes }}m buffer
+            }
+          </p>
+        }
 
         <label class="block space-y-1.5">
           <span class="text-sm font-medium text-[var(--ink-soft)]">Start</span>
@@ -67,6 +82,12 @@
             <p class="field-error">End time must be after start time</p>
           }
         </label>
+
+        @if (quotedTotal() != null && selectedResource(); as resource) {
+          <p class="rounded-lg bg-[#e8f2f0] px-4 py-3 text-sm font-semibold text-[var(--ink)]">
+            Estimated total: {{ formatMoney(quotedTotal()!, resource.currency) }}
+          </p>
+        }
 
         <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
           {{ submitting() ? 'Creating…' : 'Create booking' }}

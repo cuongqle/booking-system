@@ -1,7 +1,10 @@
 package com.bookingsystem.infrastructure.user;
 
+import com.bookingsystem.domain.user.UserRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +27,10 @@ public class UserEntity {
 
 	@Column(name = "full_name", nullable = false)
 	private String fullName;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
+	private UserRole role;
 
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
@@ -64,6 +71,14 @@ public class UserEntity {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
+	}
+
+	public UserRole getRole() {
+		return role;
+	}
+
+	public void setRole(UserRole role) {
+		this.role = role;
 	}
 
 	public Instant getCreatedAt() {

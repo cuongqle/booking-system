@@ -33,6 +33,7 @@ public class AuthService {
 				jwtService.generateToken(user),
 				user.getId(),
 				user.getEmail(),
-				user.getFullName());
+				user.getFullName(),
+				user.getRole());
 	}
 }

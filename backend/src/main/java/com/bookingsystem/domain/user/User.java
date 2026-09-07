@@ -8,6 +8,7 @@ public class User {
 	private String email;
 	private String passwordHash;
 	private String fullName;
+	private UserRole role;
 	private Instant createdAt;
 	private Instant updatedAt;
 
@@ -19,12 +20,14 @@ public class User {
 			String email,
 			String passwordHash,
 			String fullName,
+			UserRole role,
 			Instant createdAt,
 			Instant updatedAt) {
 		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.fullName = fullName;
+		this.role = role;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -59,6 +62,14 @@ public class User {
 
 	public void setFullName(String fullName) {
 		this.fullName = fullName;
+	}
+
+	public UserRole getRole() {
+		return role;
+	}
+
+	public void setRole(UserRole role) {
+		this.role = role;
 	}
 
 	public Instant getCreatedAt() {

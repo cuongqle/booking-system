@@ -17,7 +17,8 @@
       <p class="text-sm font-medium text-[var(--accent-deep)]">Edit</p>
       <h1 class="display mt-1 text-3xl text-[var(--ink)]">Update booking</h1>
       <p class="mt-2 text-sm text-[var(--ink-soft)]">
-        Change the room, time window, or status. Canceled and completed stays free the room.
+        Change the resource, time window, or status. Canceled and completed bookings free the
+        resource.
       </p>
     </div>
 
@@ -30,18 +31,20 @@
     } @else if (bookingId()) {
       <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
         <label class="block space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">Room</span>
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
           <select
             class="field"
-            formControlName="roomId"
-            [class.field--invalid]="showError(form.controls.roomId)"
+            formControlName="resourceId"
+            [class.field--invalid]="showError(form.controls.resourceId)"
           >
-            <option value="" disabled>Select a room</option>
-            @for (room of rooms(); track room.id) {
-              <option [value]="room.id">{{ room.id }} — {{ room.name }}</option>
+            <option value="" disabled>Select a resource</option>
+            @for (resource of resources(); track resource.id) {
+              <option [value]="resource.id">
+                {{ resource.id }} — {{ resource.name }} ({{ typeLabel[resource.type] }})
+              </option>
             }
           </select>
-          @if (errorMessage(form.controls.roomId, { required: 'Select a room' }); as message) {
+          @if (errorMessage(form.controls.resourceId, { required: 'Select a resource' }); as message) {
             <p class="field-error">{{ message }}</p>
           }
         </label>
@@ -76,6 +79,12 @@
             <p class="field-error">End time must be after start time</p>
           }
         </label>
+
+        @if (quotedTotal() != null && selectedResource(); as resource) {
+          <p class="rounded-lg bg-[#e8f2f0] px-4 py-3 text-sm font-semibold text-[var(--ink)]">
+            Estimated total: {{ formatMoney(quotedTotal()!, resource.currency) }}
+          </p>
+        }
 
         <label class="block space-y-1.5">
           <span class="text-sm font-medium text-[var(--ink-soft)]">Status</span>

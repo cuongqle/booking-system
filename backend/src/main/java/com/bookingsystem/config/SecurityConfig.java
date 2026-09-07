@@ -37,6 +37,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 						.requestMatchers("/health").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+						.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 						.anyRequest().authenticated())
 				.exceptionHandling(exceptions -> exceptions
 						.authenticationEntryPoint((request, response, authException) -> {
@@ -45,6 +46,13 @@ public class SecurityConfig {
 							response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 							response.getWriter().write(
 									"{\"status\":401,\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication required\"}");
+						})
+						.accessDeniedHandler((request, response, accessDeniedException) -> {
+							response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+							response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+							response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+							response.getWriter().write(
+									"{\"status\":403,\"code\":\"FORBIDDEN\",\"message\":\"Admin access required\"}");
 						}))
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

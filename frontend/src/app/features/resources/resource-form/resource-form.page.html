@@ -1,0 +1,192 @@
+<section class="mx-auto w-full max-w-md px-4 py-8 sm:px-6 fade-up">
+  <a class="text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)]" routerLink="/resources">
+    ← Back to resources
+  </a>
+
+  <div class="panel mt-5 p-6 sm:p-8">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">Admin</p>
+      <h1 class="display mt-1 text-3xl text-[var(--ink)]">
+        {{ editingId() ? 'Edit resource' : 'New resource' }}
+      </h1>
+      <p class="mt-2 text-sm text-[var(--ink-soft)]">
+        Set pricing and stay rules. Inactive resources stay in history but cannot be newly booked.
+      </p>
+    </div>
+
+    @if (error()) {
+      <p class="alert-error mt-5">{{ error() }}</p>
+    }
+
+    @if (loading()) {
+      <p class="mt-6 text-[var(--ink-soft)]">Loading resource…</p>
+    } @else {
+      <form class="mt-6 space-y-4" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Resource ID</span>
+          <input
+            class="field"
+            type="text"
+            formControlName="id"
+            placeholder="D401"
+            [class.field--invalid]="showError(form.controls.id)"
+          />
+          @if (errorMessage(form.controls.id, { required: 'Resource ID is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
+
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Name</span>
+          <input
+            class="field"
+            type="text"
+            formControlName="name"
+            [class.field--invalid]="showError(form.controls.name)"
+          />
+          @if (errorMessage(form.controls.name, { required: 'Name is required' }); as message) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
+
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Description</span>
+          <textarea class="field min-h-24" formControlName="description"></textarea>
+        </label>
+
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Type</span>
+          <select
+            class="field"
+            formControlName="type"
+            [class.field--invalid]="showError(form.controls.type)"
+          >
+            @for (type of resourceTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Price per hour</span>
+            <input
+              class="field"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="pricePerHour"
+              [class.field--invalid]="showError(form.controls.pricePerHour)"
+            />
+            @if (
+              errorMessage(form.controls.pricePerHour, {
+                required: 'Price is required',
+                min: 'Price must be 0 or more',
+              });
+              as message
+            ) {
+              <p class="field-error">{{ message }}</p>
+            }
+          </label>
+
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Currency</span>
+            <input
+              class="field"
+              type="text"
+              maxlength="3"
+              formControlName="currency"
+              [class.field--invalid]="showError(form.controls.currency)"
+            />
+            @if (
+              errorMessage(form.controls.currency, {
+                required: 'Currency is required',
+                pattern: 'Use a 3-letter code (e.g. USD)',
+              });
+              as message
+            ) {
+              <p class="field-error">{{ message }}</p>
+            }
+          </label>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Min duration (min)</span>
+            <input
+              class="field"
+              type="number"
+              min="1"
+              step="1"
+              formControlName="minDurationMinutes"
+              [class.field--invalid]="showError(form.controls.minDurationMinutes)"
+            />
+            @if (
+              errorMessage(form.controls.minDurationMinutes, {
+                required: 'Min duration is required',
+                min: 'Must be at least 1 minute',
+              });
+              as message
+            ) {
+              <p class="field-error">{{ message }}</p>
+            }
+          </label>
+
+          <label class="block space-y-1.5">
+            <span class="text-sm font-medium text-[var(--ink-soft)]">Max duration (min)</span>
+            <input
+              class="field"
+              type="number"
+              min="1"
+              step="1"
+              formControlName="maxDurationMinutes"
+              placeholder="No limit"
+              [class.field--invalid]="showError(form.controls.maxDurationMinutes)"
+            />
+            @if (
+              errorMessage(form.controls.maxDurationMinutes, {
+                min: 'Must be at least 1 minute',
+              });
+              as message
+            ) {
+              <p class="field-error">{{ message }}</p>
+            }
+          </label>
+        </div>
+
+        <label class="block space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">Buffer (min)</span>
+          <input
+            class="field"
+            type="number"
+            min="0"
+            step="1"
+            formControlName="bufferMinutes"
+            [class.field--invalid]="showError(form.controls.bufferMinutes)"
+          />
+          <p class="text-xs text-[var(--ink-soft)]">
+            Turnover gap before and after each booking.
+          </p>
+          @if (
+            errorMessage(form.controls.bufferMinutes, {
+              required: 'Buffer is required',
+              min: 'Buffer must be 0 or more',
+            });
+            as message
+          ) {
+            <p class="field-error">{{ message }}</p>
+          }
+        </label>
+
+        <label class="flex items-center gap-3 text-sm text-[var(--ink)]">
+          <input class="h-4 w-4 accent-[var(--accent)]" type="checkbox" formControlName="active" />
+          Active (available for new bookings)
+        </label>
+
+        <button class="btn btn-primary w-full" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Saving…' : editingId() ? 'Save changes' : 'Create resource' }}
+        </button>
+      </form>
+    }
+  </div>
+</section>

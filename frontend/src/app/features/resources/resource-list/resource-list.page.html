@@ -1,0 +1,57 @@
+<section class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">Admin</p>
+      <h1 class="display mt-1 text-3xl text-[var(--ink)] sm:text-4xl">Resources</h1>
+      <p class="mt-2 text-[var(--ink-soft)]">Create and update bookable resources.</p>
+    </div>
+    <a class="btn btn-primary self-start sm:self-auto" routerLink="/resources/new">New resource</a>
+  </div>
+
+  @if (error()) {
+    <p class="alert-error mt-6">{{ error() }}</p>
+  }
+
+  <div class="mt-8">
+    @if (loading()) {
+      <p class="text-[var(--ink-soft)]">Loading resources…</p>
+    } @else if (resources().length === 0) {
+      <div class="panel px-6 py-14 text-center">
+        <p class="display text-2xl text-[var(--ink)]">No resources yet</p>
+        <a class="btn btn-primary mt-6" routerLink="/resources/new">Create resource</a>
+      </div>
+    } @else {
+      <ul class="panel overflow-hidden">
+        @for (resource of resources(); track resource.id) {
+          <li class="border-b border-[var(--line)] last:border-b-0">
+            <a
+              class="list-row flex items-center justify-between gap-4 px-5 py-4"
+              [routerLink]="['/resources', resource.id, 'edit']"
+            >
+              <div>
+                <p class="font-semibold text-[var(--ink)]">
+                  {{ resource.id }} — {{ resource.name }}
+                </p>
+                <p class="mt-0.5 text-sm text-[var(--ink-soft)]">
+                  {{ typeLabel[resource.type] }}
+                  · {{ resource.pricePerHour | number: '1.2-2' }} {{ resource.currency }}/hr
+                  · min {{ resource.minDurationMinutes }}m
+                  @if (resource.description) {
+                    · {{ resource.description }}
+                  }
+                </p>
+              </div>
+              <span
+                class="status-chip"
+                [class.status-chip--confirmed]="resource.active"
+                [class.status-chip--cancelled]="!resource.active"
+              >
+                {{ resource.active ? 'Active' : 'Inactive' }}
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

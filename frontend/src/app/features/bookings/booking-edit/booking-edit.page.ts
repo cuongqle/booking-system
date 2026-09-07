@@ -1,8 +1,17 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 import { BookingService } from '../booking.service';
-import { BOOKING_STATUSES, BookingStatus, Room } from '../booking.models';
+import {
+  BOOKING_STATUSES,
+  BookingStatus,
+  RESOURCE_TYPE_LABELS,
+  Resource,
+  formatMoney,
+  quoteBookingTotal,
+} from '../booking.models';
 import { extractErrorMessage } from '../../../core/api/extract-error-message';
 import { controlErrorMessage, showControlError } from '../../../core/forms/form-errors';
 import {
@@ -24,23 +33,40 @@ export class BookingEditPage implements OnInit {
   private readonly router = inject(Router);
 
   readonly statuses = BOOKING_STATUSES;
-  readonly rooms = signal<Room[]>([]);
+  readonly resources = signal<Resource[]>([]);
   readonly bookingId = signal<number | null>(null);
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
   readonly showError = showControlError;
   readonly errorMessage = controlErrorMessage;
+  readonly typeLabel = RESOURCE_TYPE_LABELS;
+  readonly formatMoney = formatMoney;
 
   readonly form = this.fb.nonNullable.group(
     {
-      roomId: ['', [Validators.required]],
+      resourceId: ['', [Validators.required]],
       startDate: ['', [Validators.required]],
       endDate: ['', [Validators.required]],
       status: ['PENDING' as BookingStatus, [Validators.required]],
     },
     { validators: [dateRangeValidator()] },
   );
+
+  private readonly formValue = toSignal(
+    this.form.valueChanges.pipe(startWith(this.form.getRawValue())),
+    { initialValue: this.form.getRawValue() },
+  );
+
+  readonly selectedResource = computed(() => {
+    const id = this.formValue().resourceId;
+    return this.resources().find((resource) => resource.id === id);
+  });
+
+  readonly quotedTotal = computed(() => {
+    const value = this.formValue();
+    return quoteBookingTotal(this.selectedResource(), value.startDate ?? '', value.endDate ?? '');
+  });
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -52,15 +78,15 @@ export class BookingEditPage implements OnInit {
 
     this.bookingId.set(id);
 
-    this.bookingService.getRooms().subscribe({
-      next: (rooms) => this.rooms.set(rooms),
-      error: (err) => this.error.set(extractErrorMessage(err, 'Failed to load rooms')),
+    this.bookingService.getResources().subscribe({
+      next: (resources) => this.resources.set(resources),
+      error: (err) => this.error.set(extractErrorMessage(err, 'Failed to load resources')),
     });
 
     this.bookingService.getBooking(id).subscribe({
       next: (booking) => {
         this.form.patchValue({
-          roomId: booking.roomId,
+          resourceId: booking.resourceId,
           startDate: toDatetimeLocalValue(booking.startDate),
           endDate: toDatetimeLocalValue(booking.endDate),
           status: booking.status,
@@ -96,7 +122,7 @@ export class BookingEditPage implements OnInit {
     const raw = this.form.getRawValue();
     this.bookingService
       .updateBooking(id, {
-        roomId: raw.roomId,
+        resourceId: raw.resourceId,
         startDate: fromDatetimeLocalValue(raw.startDate),
         endDate: fromDatetimeLocalValue(raw.endDate),
         status: raw.status,

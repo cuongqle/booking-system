@@ -23,13 +23,20 @@ public class AuthController {
 	@PostMapping("/register")
 	@ResponseStatus(HttpStatus.CREATED)
 	public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-		AuthResult result = authService.register(request.toCommand());
-		return AuthResponse.bearer(result.accessToken(), result.userId(), result.email(), result.fullName());
+		return toResponse(authService.register(request.toCommand()));
 	}
 
 	@PostMapping("/login")
 	public AuthResponse login(@Valid @RequestBody LoginRequest request) {
-		AuthResult result = authService.login(request.toCommand());
-		return AuthResponse.bearer(result.accessToken(), result.userId(), result.email(), result.fullName());
+		return toResponse(authService.login(request.toCommand()));
+	}
+
+	private AuthResponse toResponse(AuthResult result) {
+		return AuthResponse.bearer(
+				result.accessToken(),
+				result.userId(),
+				result.email(),
+				result.fullName(),
+				result.role());
 	}
 }

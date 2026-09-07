@@ -1,14 +1,17 @@
 # Harbor — Booking System
 
-Harbor is a full-stack room reservation app. Authenticated users pick a room from the catalog, book a time window, track stays on a calendar, and update booking status. Overlapping **Pending** or **Confirmed** bookings on the same room are rejected.
+Harbor is a full-stack generic resource booking app. Authenticated users pick a resource (meeting room, desk, equipment, and more), book a time window, track reservations on a calendar, and update booking status. Overlapping **Pending** or **Confirmed** bookings on the same resource are rejected.
 
 ## Features
 
-- Register / sign in with JWT
-- Room catalog selection (no free-text room IDs)
+- Register / sign in with JWT (`USER` by default; `ADMIN` for resource management)
+- Persisted resource catalog with types (`MEETING_ROOM`, `DESK`, `EQUIPMENT`, `OTHER`)
+- Admin resource create/edit (active/inactive)
 - Create, view, and edit bookings with start/end date-time
+- Hourly pricing with total amount snapshotted on each booking
+- Stay rules per resource: min/max duration and turnover buffer
 - Status workflow: Pending → Confirmed → Canceled / Completed
-- Conflict validation on create and update
+- Conflict validation on create and update (includes buffer windows)
 - Month calendar view of your reservations
 - Field-level form validation on auth and booking screens
 
@@ -124,10 +127,26 @@ Base path: `/api/v1`
 | --- | --- | --- |
 | `POST` | `/auth/register` | Public |
 | `POST` | `/auth/login` | Public → JWT |
-| `GET` | `/rooms` | Auth required |
+| `GET` | `/resources` | Active resources (any authenticated user) |
+| `GET` | `/admin/resources` | All resources (**ADMIN**) |
+| `POST` | `/admin/resources` | Create resource (**ADMIN**) |
+| `PUT` | `/admin/resources/{id}` | Update resource (**ADMIN**) |
 | `GET` | `/bookings` | Current user’s bookings |
-| `POST` | `/bookings` | Create (`PENDING`) |
+| `POST` | `/bookings` | Create (`PENDING`); body uses `resourceId` |
 | `GET` | `/bookings/{id}` | Own booking |
-| `PUT` | `/bookings/{id}` | Update room, times, status |
+| `PUT` | `/bookings/{id}` | Update resource, times, status |
+
+Promote an admin (after register/login once), or use the seeded account from `V6`:
+
+| Field | Value |
+| --- | --- |
+| Email | `admin@harbor.com` |
+| Password | `Admin123!` |
+
+```sql
+UPDATE users SET role = 'ADMIN' WHERE email = 'you@example.com';
+```
+
+Then sign out and sign in again so the JWT includes `ADMIN`.
 
 Health check (no `/api/v1` prefix): `GET /health`

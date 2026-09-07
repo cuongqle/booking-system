@@ -1,24 +1,37 @@
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
 
+export type ResourceType = 'MEETING_ROOM' | 'DESK' | 'EQUIPMENT' | 'OTHER';
+
 export interface Booking {
   id: number;
   userId: number;
-  roomId: string;
+  resourceId: string;
   startDate: string;
   endDate: string;
   status: BookingStatus;
+  totalAmount: number;
+  currency: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Room {
+export interface Resource {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
+  type: ResourceType;
+  active: boolean;
+  pricePerHour: number;
+  currency: string;
+  minDurationMinutes: number;
+  maxDurationMinutes: number | null;
+  bufferMinutes: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BookingWriteRequest {
-  roomId: string;
+  resourceId: string;
   startDate: string;
   endDate: string;
 }
@@ -59,6 +72,13 @@ export const BOOKING_STATUSES: {
   },
 ];
 
+export const RESOURCE_TYPE_LABELS: Record<ResourceType, string> = {
+  MEETING_ROOM: 'Meeting room',
+  DESK: 'Desk',
+  EQUIPMENT: 'Equipment',
+  OTHER: 'Other',
+};
+
 export function bookingStatusMeta(status: BookingStatus) {
   return (
     BOOKING_STATUSES.find((item) => item.value === status) ?? {
@@ -68,4 +88,32 @@ export function bookingStatusMeta(status: BookingStatus) {
       pillClass: 'booking-pill booking-pill--pending',
     }
   );
+}
+
+export function formatMoney(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+}
+
+export function quoteBookingTotal(
+  resource: Resource | undefined,
+  startLocal: string,
+  endLocal: string,
+): number | null {
+  if (!resource || !startLocal || !endLocal) {
+    return null;
+  }
+  const start = new Date(startLocal);
+  const end = new Date(endLocal);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+    return null;
+  }
+  const minutes = (end.getTime() - start.getTime()) / 60_000;
+  return Math.round(resource.pricePerHour * (minutes / 60) * 100) / 100;
 }

@@ -47,16 +47,37 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "A101",
+								  "resourceId": "A101",
 								  "startDate": "%s",
 								  "endDate": "%s"
 								}
 								""".formatted(window[0], window[1])))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.id").isNumber())
-				.andExpect(jsonPath("$.roomId").value("A101"))
+				.andExpect(jsonPath("$.resourceId").value("A101"))
 				.andExpect(jsonPath("$.status").value("PENDING"))
-				.andExpect(jsonPath("$.userId").isNumber());
+				.andExpect(jsonPath("$.userId").isNumber())
+				.andExpect(jsonPath("$.totalAmount").value(80.00))
+				.andExpect(jsonPath("$.currency").value("USD"));
+	}
+
+	@Test
+	void createBooking_shorterThanMinDuration_returnsBadRequest() throws Exception {
+		String token = AuthTestSupport.registerAndGetToken(mockMvc);
+		LocalDateTime start = LocalDateTime.of(2027, 6, 1, 8, 0).plusHours(SLOT.getAndIncrement() * 3L);
+
+		mockMvc.perform(post("/api/v1/bookings")
+						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "resourceId": "A101",
+								  "startDate": "%s",
+								  "endDate": "%s"
+								}
+								""".formatted(start.format(DATE_TIME), start.plusMinutes(15).format(DATE_TIME))))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("STAY_RULE_VIOLATION"));
 	}
 
 	@Test
@@ -68,7 +89,7 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "A101",
+								  "resourceId": "A101",
 								  "startDate": "2026-09-12T14:00:00",
 								  "endDate": "2026-09-10T10:00:00"
 								}
@@ -78,7 +99,7 @@ class BookingApiTest {
 	}
 
 	@Test
-	void createBooking_withUnknownRoom_returnsBadRequest() throws Exception {
+	void createBooking_withUnknownResource_returnsBadRequest() throws Exception {
 		String token = AuthTestSupport.registerAndGetToken(mockMvc);
 		String[] window = nextWindow();
 
@@ -87,13 +108,13 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "Z999",
+								  "resourceId": "Z999",
 								  "startDate": "%s",
 								  "endDate": "%s"
 								}
 								""".formatted(window[0], window[1])))
 				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("$.code").value("INVALID_ROOM"));
+				.andExpect(jsonPath("$.code").value("INVALID_RESOURCE"));
 	}
 
 	@Test
@@ -105,7 +126,7 @@ class BookingApiTest {
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(bookingId))
-				.andExpect(jsonPath("$.roomId").value("B202"));
+				.andExpect(jsonPath("$.resourceId").value("B202"));
 	}
 
 	@Test
@@ -133,7 +154,7 @@ class BookingApiTest {
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + aliceToken))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.length()").value(1))
-				.andExpect(jsonPath("$[0].roomId").value("A101"));
+				.andExpect(jsonPath("$[0].resourceId").value("A101"));
 	}
 
 	@Test
@@ -151,7 +172,7 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "B201",
+								  "resourceId": "B201",
 								  "startDate": "%s",
 								  "endDate": "%s"
 								}
@@ -171,7 +192,7 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "C302",
+								  "resourceId": "C302",
 								  "startDate": "%s",
 								  "endDate": "%s"
 								}
@@ -190,7 +211,7 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "A101",
+								  "resourceId": "A101",
 								  "startDate": "%s",
 								  "endDate": "%s",
 								  "status": "CONFIRMED"
@@ -219,7 +240,7 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "B202",
+								  "resourceId": "B202",
 								  "startDate": "%s",
 								  "endDate": "%s",
 								  "status": "PENDING"
@@ -241,7 +262,7 @@ class BookingApiTest {
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "C301",
+								  "resourceId": "C301",
 								  "startDate": "%s",
 								  "endDate": "%s",
 								  "status": "CONFIRMED"
@@ -251,22 +272,22 @@ class BookingApiTest {
 				.andExpect(jsonPath("$.code").value("BOOKING_NOT_FOUND"));
 	}
 
-	private Long createBooking(String token, String roomId) throws Exception {
+	private Long createBooking(String token, String resourceId) throws Exception {
 		String[] window = nextWindow();
-		return createBooking(token, roomId, window[0], window[1]);
+		return createBooking(token, resourceId, window[0], window[1]);
 	}
 
-	private Long createBooking(String token, String roomId, String startDate, String endDate) throws Exception {
+	private Long createBooking(String token, String resourceId, String startDate, String endDate) throws Exception {
 		MvcResult result = mockMvc.perform(post("/api/v1/bookings")
 						.header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
-								  "roomId": "%s",
+								  "resourceId": "%s",
 								  "startDate": "%s",
 								  "endDate": "%s"
 								}
-								""".formatted(roomId, startDate, endDate)))
+								""".formatted(resourceId, startDate, endDate)))
 				.andExpect(status().isCreated())
 				.andReturn();
 

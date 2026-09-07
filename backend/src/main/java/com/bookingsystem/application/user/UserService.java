@@ -1,6 +1,7 @@
 package com.bookingsystem.application.user;
 
 import com.bookingsystem.domain.user.User;
+import com.bookingsystem.domain.user.UserRole;
 import com.bookingsystem.infrastructure.user.UserMapper;
 import com.bookingsystem.infrastructure.user.UserRepository;
 import java.time.Instant;
@@ -36,6 +37,7 @@ public class UserService {
 				command.email().toLowerCase().trim(),
 				passwordEncoder.encode(command.password()),
 				command.fullName().trim(),
+				UserRole.USER,
 				now,
 				now);
 

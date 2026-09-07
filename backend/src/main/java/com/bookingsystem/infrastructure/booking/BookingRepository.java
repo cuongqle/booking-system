@@ -18,14 +18,14 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
 	@Query("""
 			select case when count(b) > 0 then true else false end
 			from BookingEntity b
-			where b.roomId = :roomId
+			where b.resourceId = :resourceId
 			  and b.status in :blockingStatuses
 			  and b.startDate < :endDate
 			  and b.endDate > :startDate
 			  and (:excludeId is null or b.id <> :excludeId)
 			""")
 	boolean existsOverlapping(
-			@Param("roomId") String roomId,
+			@Param("resourceId") String resourceId,
 			@Param("startDate") LocalDateTime startDate,
 			@Param("endDate") LocalDateTime endDate,
 			@Param("excludeId") Long excludeId,
