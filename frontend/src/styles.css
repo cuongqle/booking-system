@@ -1440,6 +1440,115 @@
     background: rgba(255, 255, 255, 0.85);
   }
 
+  .data-list {
+    max-height: 100%;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    background: var(--panel);
+  }
+
+  .data-list__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.75rem 1rem;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--line);
+    color: inherit;
+    text-decoration: none;
+    transition: background-color 160ms ease;
+  }
+
+  .data-list__row:last-child {
+    border-bottom: none;
+  }
+
+  .data-list__row:hover {
+    background: color-mix(in srgb, var(--accent) 6%, white);
+  }
+
+  @media (min-width: 640px) {
+    .data-list__row {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto;
+      padding: 0.75rem 1.15rem;
+    }
+  }
+
+  .data-list__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: var(--ink);
+  }
+
+  .data-list__meta {
+    margin: 0.15rem 0 0;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+
+  .data-list__aside {
+    display: none;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+
+  @media (min-width: 640px) {
+    .data-list__aside {
+      display: block;
+    }
+  }
+
+  .data-list__amount {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-deep);
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .data-list__chevron {
+    display: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid color-mix(in srgb, var(--ink-soft) 70%, transparent);
+    border-bottom: 2px solid color-mix(in srgb, var(--ink-soft) 70%, transparent);
+    transform: rotate(-45deg);
+  }
+
+  @media (min-width: 640px) {
+    .data-list__chevron {
+      display: block;
+    }
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: end;
+  }
+
+  .filter-bar .field {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.875rem;
+    border-radius: 0.6rem;
+  }
+
+  .filter-bar .btn {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.875rem;
+  }
+
+  .result-count {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
   .notification-item--unread {
     background: color-mix(in srgb, var(--accent) 8%, white);
   }

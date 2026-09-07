@@ -9,7 +9,7 @@
         @if (auth.isAdmin()) {
           Search every reservation by status, resource, or user.
         } @else {
-          Only reservations tied to your signed-in account.
+          Reservations on your account.
         }
       </p>
     </div>
@@ -19,14 +19,14 @@
     </div>
   </div>
 
-  <div class="panel mt-4 shrink-0 px-5 py-4 sm:px-6">
-    <div class="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-      <label class="block min-w-[10rem] flex-1 space-y-1.5">
-        <span class="text-sm font-medium text-[var(--ink-soft)]">Status</span>
+  <div class="panel mt-4 shrink-0 px-4 py-3 sm:px-5">
+    <div class="filter-bar">
+      <label class="block min-w-[9rem] flex-1 space-y-1">
+        <span class="text-xs font-medium text-[var(--ink-soft)]">Status</span>
         <select
           class="field"
           [ngModel]="statusFilter()"
-          (ngModelChange)="statusFilter.set($event)"
+          (ngModelChange)="statusFilter.set($event); applyFilters()"
         >
           <option value="">All statuses</option>
           @for (option of statusOptions; track option.value) {
@@ -35,12 +35,12 @@
         </select>
       </label>
 
-      <label class="block min-w-[12rem] flex-1 space-y-1.5">
-        <span class="text-sm font-medium text-[var(--ink-soft)]">Resource</span>
+      <label class="block min-w-[11rem] flex-[1.4] space-y-1">
+        <span class="text-xs font-medium text-[var(--ink-soft)]">Resource</span>
         <select
           class="field"
           [ngModel]="resourceFilter()"
-          (ngModelChange)="resourceFilter.set($event)"
+          (ngModelChange)="resourceFilter.set($event); applyFilters()"
         >
           <option value="">All resources</option>
           @for (resource of resources(); track resource.id) {
@@ -50,8 +50,8 @@
       </label>
 
       @if (auth.isAdmin()) {
-        <label class="block min-w-[8rem] flex-1 space-y-1.5">
-          <span class="text-sm font-medium text-[var(--ink-soft)]">User ID</span>
+        <label class="block min-w-[7rem] flex-1 space-y-1">
+          <span class="text-xs font-medium text-[var(--ink-soft)]">User ID</span>
           <input
             class="field"
             type="text"
@@ -59,12 +59,15 @@
             placeholder="Any"
             [ngModel]="userIdFilter()"
             (ngModelChange)="userIdFilter.set($event)"
+            (keyup.enter)="applyFilters()"
           />
         </label>
       }
 
       <div class="flex flex-wrap gap-2">
-        <button class="btn btn-primary" type="button" (click)="applyFilters()">Apply</button>
+        @if (auth.isAdmin()) {
+          <button class="btn btn-primary" type="button" (click)="applyFilters()">Apply</button>
+        }
         <button class="btn btn-ghost" type="button" (click)="clearFilters()">Clear</button>
       </div>
     </div>
@@ -74,42 +77,50 @@
     <p class="alert-error mt-3 shrink-0">{{ error() }}</p>
   }
 
-  <div class="mt-4 min-h-0 flex-1">
+  <div class="mt-3 flex min-h-0 flex-1 flex-col gap-2">
+    @if (!loading() && bookings().length > 0) {
+      <p class="result-count shrink-0">
+        {{ bookings().length }} {{ bookings().length === 1 ? 'booking' : 'bookings' }}
+      </p>
+    }
+
     @if (loading()) {
-      <p class="text-[var(--ink-soft)]">Loading bookings…</p>
+      <p class="text-sm text-[var(--ink-soft)]">Loading bookings…</p>
     } @else if (bookings().length === 0) {
-      <div class="panel px-6 py-14 text-center">
-        <p class="display text-2xl text-[var(--ink)]">No bookings found</p>
-        <p class="mx-auto mt-2 max-w-sm text-sm text-[var(--ink-soft)]">
+      <div class="panel px-6 py-10 text-center">
+        <p class="display text-xl text-[var(--ink)]">No bookings found</p>
+        <p class="mx-auto mt-1 max-w-sm text-sm text-[var(--ink-soft)]">
           Try clearing filters, or create a new booking.
         </p>
-        <a class="btn btn-primary mt-6" routerLink="/bookings/new">Create booking</a>
+        <a class="btn btn-primary mt-5" routerLink="/bookings/new">Create booking</a>
       </div>
     } @else {
-      <ul class="panel h-full min-h-0 w-full overflow-y-auto overflow-x-hidden">
+      <ul class="data-list">
         @for (booking of bookings(); track booking.id) {
-          <li class="border-b border-[var(--line)] last:border-b-0">
-            <a
-              class="list-row flex w-full items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5"
-              [routerLink]="['/bookings', booking.id]"
-            >
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <p class="font-semibold text-[var(--ink)]">{{ booking.resourceId }}</p>
+          <li>
+            <a class="data-list__row" [routerLink]="['/bookings', booking.id]">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="data-list__title">
+                    {{ resourceLabel(booking.resourceId) }}
+                  </p>
                   <span [class]="statusMeta(booking.status).chipClass">
                     {{ statusMeta(booking.status).label }}
                   </span>
                 </div>
-                <p class="mt-1 text-sm text-[var(--ink-soft)]">
+                <p class="data-list__meta">
+                  #{{ booking.id }}
                   @if (auth.isAdmin()) {
-                    User #{{ booking.userId }} ·
+                    · User #{{ booking.userId }}
                   }
-                  {{ formatRange(booking.startDate, booking.endDate) }}
+                  <span class="sm:hidden"> · {{ formatRange(booking.startDate, booking.endDate) }}</span>
                 </p>
               </div>
-              <p class="shrink-0 text-sm font-semibold text-[var(--accent-deep)] sm:text-base">
+              <p class="data-list__aside">{{ formatRange(booking.startDate, booking.endDate) }}</p>
+              <p class="data-list__amount">
                 {{ formatMoney(booking.totalAmount, booking.currency) }}
               </p>
+              <span class="data-list__chevron" aria-hidden="true"></span>
             </a>
           </li>
         }

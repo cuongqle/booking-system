@@ -78,4 +78,9 @@ export class BookingListPage implements OnInit {
     this.userIdFilter.set('');
     this.load();
   }
+
+  resourceLabel(resourceId: string): string {
+    const resource = this.resources().find((item) => item.id === resourceId);
+    return resource ? `${resource.id} · ${resource.name}` : resourceId;
+  }
 }
