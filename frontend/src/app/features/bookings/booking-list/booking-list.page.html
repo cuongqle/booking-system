@@ -2,8 +2,16 @@
   <div class="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <p class="text-sm font-medium text-[var(--accent-deep)]">Workspace</p>
-      <h1 class="display mt-0.5 text-2xl text-[var(--ink)] sm:text-3xl">My bookings</h1>
-      <p class="mt-1 text-sm text-[var(--ink-soft)]">Only reservations tied to your signed-in account.</p>
+      <h1 class="display mt-0.5 text-2xl text-[var(--ink)] sm:text-3xl">
+        {{ auth.isAdmin() ? 'All bookings' : 'My bookings' }}
+      </h1>
+      <p class="mt-1 text-sm text-[var(--ink-soft)]">
+        @if (auth.isAdmin()) {
+          Search every reservation by status, resource, or user.
+        } @else {
+          Only reservations tied to your signed-in account.
+        }
+      </p>
     </div>
     <div class="flex flex-wrap gap-2">
       <a class="btn btn-ghost !px-3 !py-1.5 text-sm" routerLink="/bookings/calendar">Calendar</a>
@@ -41,6 +49,20 @@
         </select>
       </label>
 
+      @if (auth.isAdmin()) {
+        <label class="block min-w-[8rem] flex-1 space-y-1.5">
+          <span class="text-sm font-medium text-[var(--ink-soft)]">User ID</span>
+          <input
+            class="field"
+            type="text"
+            inputmode="numeric"
+            placeholder="Any"
+            [ngModel]="userIdFilter()"
+            (ngModelChange)="userIdFilter.set($event)"
+          />
+        </label>
+      }
+
       <div class="flex flex-wrap gap-2">
         <button class="btn btn-primary" type="button" (click)="applyFilters()">Apply</button>
         <button class="btn btn-ghost" type="button" (click)="clearFilters()">Clear</button>
@@ -54,7 +76,7 @@
 
   <div class="mt-4 min-h-0 flex-1">
     @if (loading()) {
-      <p class="text-[var(--ink-soft)]">Loading your bookings…</p>
+      <p class="text-[var(--ink-soft)]">Loading bookings…</p>
     } @else if (bookings().length === 0) {
       <div class="panel px-6 py-14 text-center">
         <p class="display text-2xl text-[var(--ink)]">No bookings found</p>
@@ -79,6 +101,9 @@
                   </span>
                 </div>
                 <p class="mt-1 text-sm text-[var(--ink-soft)]">
+                  @if (auth.isAdmin()) {
+                    User #{{ booking.userId }} ·
+                  }
                   {{ formatRange(booking.startDate, booking.endDate) }}
                 </p>
               </div>

@@ -14,6 +14,7 @@ import {
 export interface BookingListFilters {
   status?: BookingStatus | '';
   resourceId?: string;
+  userId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +30,20 @@ export class BookingService {
       params = params.set('resourceId', filters.resourceId.trim());
     }
     return this.http.get<Booking[]>(apiUrl('/bookings'), { params });
+  }
+
+  listAllBookings(filters: BookingListFilters = {}): Observable<Booking[]> {
+    let params = new HttpParams();
+    if (filters.status) {
+      params = params.set('status', filters.status);
+    }
+    if (filters.resourceId?.trim()) {
+      params = params.set('resourceId', filters.resourceId.trim());
+    }
+    if (filters.userId?.trim()) {
+      params = params.set('userId', filters.userId.trim());
+    }
+    return this.http.get<Booking[]>(apiUrl('/admin/bookings'), { params });
   }
 
   getBooking(id: number): Observable<Booking> {

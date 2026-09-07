@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../../core/auth/auth.service';
 import { BookingService } from '../booking.service';
 import {
   BOOKING_STATUSES,
@@ -21,6 +22,7 @@ import { formatBookingRange } from '../calendar.utils';
 })
 export class BookingListPage implements OnInit {
   private readonly bookingService = inject(BookingService);
+  readonly auth = inject(AuthService);
 
   readonly bookings = signal<Booking[]>([]);
   readonly resources = signal<Resource[]>([]);
@@ -28,6 +30,7 @@ export class BookingListPage implements OnInit {
   readonly error = signal<string | null>(null);
   readonly statusFilter = signal<BookingStatus | ''>('');
   readonly resourceFilter = signal('');
+  readonly userIdFilter = signal('');
   readonly formatRange = formatBookingRange;
   readonly statusMeta = bookingStatusMeta;
   readonly formatMoney = formatMoney;
@@ -44,21 +47,25 @@ export class BookingListPage implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.bookingService
-      .getBookings({
-        status: this.statusFilter(),
-        resourceId: this.resourceFilter(),
-      })
-      .subscribe({
-        next: (bookings) => {
-          this.bookings.set(bookings);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.error.set(extractErrorMessage(err, 'Failed to load bookings'));
-          this.loading.set(false);
-        },
-      });
+    const filters = {
+      status: this.statusFilter(),
+      resourceId: this.resourceFilter(),
+      userId: this.userIdFilter(),
+    };
+    const request = this.auth.isAdmin()
+      ? this.bookingService.listAllBookings(filters)
+      : this.bookingService.getBookings(filters);
+
+    request.subscribe({
+      next: (bookings) => {
+        this.bookings.set(bookings);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(extractErrorMessage(err, 'Failed to load bookings'));
+        this.loading.set(false);
+      },
+    });
   }
 
   applyFilters(): void {
@@ -68,6 +75,7 @@ export class BookingListPage implements OnInit {
   clearFilters(): void {
     this.statusFilter.set('');
     this.resourceFilter.set('');
+    this.userIdFilter.set('');
     this.load();
   }
 }

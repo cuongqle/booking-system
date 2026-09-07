@@ -12,7 +12,7 @@ Harbor is a full-stack generic resource booking app. Authenticated users pick a 
 - Stay rules per resource: min/max duration and turnover buffer
 - Status workflow: Pending → Confirmed (after payment) → Canceled / Completed
 - Stub invoices: create booking → unpaid invoice; pay confirms booking
-- Users can list their invoices; admins can list all invoices with filters
+- Users can list their bookings/invoices; admins can list all with filters
 - Conflict validation on create and update (includes buffer windows)
 - Month calendar view of your reservations
 - In-app notifications for booking create/update/payment (header bell)
@@ -136,11 +136,12 @@ Base path: `/api/v1`
 | `PUT` | `/admin/resources/{id}` | Update resource (**ADMIN**) |
 | `GET` | `/bookings` | Current user’s bookings (`?status=&resourceId=`) |
 | `POST` | `/bookings` | Create (`PENDING` + unpaid invoice); body uses `resourceId` |
-| `GET` | `/bookings/{id}` | Own booking |
+| `GET` | `/bookings/{id}` | Own booking (admins can open any) |
 | `PUT` | `/bookings/{id}` | Update resource, times, status (`CONFIRMED` requires paid invoice) |
 | `GET` | `/bookings/{id}/invoice` | Invoice for booking |
 | `POST` | `/bookings/{id}/pay` | Stub payment → invoice `PAID`, booking `CONFIRMED` |
 | `GET` | `/invoices` | Current user’s invoices (`?status=`) |
+| `GET` | `/admin/bookings` | All bookings (**ADMIN**; `?status=&resourceId=&userId=`) |
 | `GET` | `/admin/invoices` | All invoices (**ADMIN**; `?status=&userId=&bookingId=`) |
 | `GET` | `/notifications` | Current user’s notifications |
 | `GET` | `/notifications/unread-count` | Unread badge count |

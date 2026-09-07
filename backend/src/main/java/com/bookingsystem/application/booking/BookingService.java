@@ -57,6 +57,13 @@ public class BookingService {
 				.toList();
 	}
 
+	public List<Booking> listAll(BookingStatus status, String resourceId, Long userId) {
+		String resourceFilter = resourceId == null || resourceId.isBlank() ? null : resourceId.trim();
+		return bookingRepository.search(status, resourceFilter, userId).stream()
+				.map(bookingMapper::toDomain)
+				.toList();
+	}
+
 	public Booking getBooking(Long id, Long userId) {
 		return bookingRepository.findByIdAndUserId(id, userId)
 				.map(bookingMapper::toDomain)
