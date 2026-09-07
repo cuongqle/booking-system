@@ -1,0 +1,61 @@
+<section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <p class="text-sm font-medium text-[var(--accent-deep)]">Platform</p>
+      <h1 class="display mt-1 text-3xl text-[var(--ink)] sm:text-4xl">Organizations</h1>
+      <p class="mt-2 text-[var(--ink-soft)]">
+        Manage every tenant workspace. Org admins handle day-to-day booking inside each company.
+      </p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <p class="alert-error mt-6">{{ error() }}</p>
+  }
+
+  <form
+    class="panel mt-8 flex flex-col gap-3 p-4 sm:flex-row sm:items-end"
+    (ngSubmit)="create()"
+  >
+    <label class="block min-w-0 flex-1 space-y-1.5">
+      <span class="text-sm font-medium text-[var(--ink-soft)]">New company name</span>
+      <input
+        class="field"
+        type="text"
+        name="name"
+        [ngModel]="newName()"
+        (ngModelChange)="newName.set($event)"
+        placeholder="Acme Studio"
+        autocomplete="organization"
+      />
+    </label>
+    <button class="btn btn-primary shrink-0" type="submit" [disabled]="submitting()">
+      {{ submitting() ? 'Creating…' : 'Create organization' }}
+    </button>
+  </form>
+
+  <div class="mt-8">
+    @if (loading()) {
+      <p class="text-[var(--ink-soft)]">Loading organizations…</p>
+    } @else if (organizations().length === 0) {
+      <div class="panel px-6 py-14 text-center">
+        <p class="display text-2xl text-[var(--ink)]">No organizations yet</p>
+      </div>
+    } @else {
+      <ul class="panel overflow-hidden">
+        @for (org of organizations(); track org.id) {
+          <li class="flex items-center justify-between gap-4 border-b border-[var(--line)] px-5 py-4 last:border-b-0">
+            <div>
+              <p class="font-semibold text-[var(--ink)]">{{ org.name }}</p>
+              <p class="mt-0.5 text-sm text-[var(--ink-soft)]">
+                slug/{{ org.slug }} · {{ org.userCount }}
+                {{ org.userCount === 1 ? 'user' : 'users' }}
+                · created {{ org.createdAt | date: 'mediumDate' }}
+              </p>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

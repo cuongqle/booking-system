@@ -16,6 +16,7 @@ export class AuthService {
   readonly currentUser = this.userSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.tokenSignal());
   readonly isAdmin = computed(() => this.userSignal()?.role === 'ADMIN');
+  readonly isSuperAdmin = computed(() => this.userSignal()?.role === 'SUPER_ADMIN');
 
   constructor(private readonly http: HttpClient) {
     const user = this.readUser();
@@ -51,9 +52,9 @@ export class AuthService {
   private persistSession(response: AuthResponse): void {
     const user: AuthUser = {
       userId: response.userId,
-      organizationId: response.organizationId,
-      organizationName: response.organizationName,
-      organizationSlug: response.organizationSlug,
+      organizationId: response.organizationId ?? null,
+      organizationName: response.organizationName ?? null,
+      organizationSlug: response.organizationSlug ?? null,
       email: response.email,
       fullName: response.fullName,
       role: response.role ?? 'USER',
@@ -75,17 +76,18 @@ export class AuthService {
     }
     try {
       const parsed = JSON.parse(raw) as AuthUser & { role?: UserRole };
-      if (parsed.organizationId == null || !parsed.organizationName) {
+      const role = parsed.role ?? 'USER';
+      if (role !== 'SUPER_ADMIN' && (parsed.organizationId == null || !parsed.organizationName)) {
         return null;
       }
       return {
         userId: parsed.userId,
-        organizationId: parsed.organizationId,
-        organizationName: parsed.organizationName,
-        organizationSlug: parsed.organizationSlug,
+        organizationId: parsed.organizationId ?? null,
+        organizationName: parsed.organizationName ?? null,
+        organizationSlug: parsed.organizationSlug ?? null,
         email: parsed.email,
         fullName: parsed.fullName,
-        role: parsed.role ?? 'USER',
+        role,
       };
     } catch {
       return null;

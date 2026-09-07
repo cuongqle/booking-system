@@ -23,5 +23,10 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/resources/resources.routes').then((m) => m.RESOURCES_ROUTES),
   },
+  {
+    path: 'platform',
+    loadChildren: () =>
+      import('./features/platform/platform.routes').then((m) => m.PLATFORM_ROUTES),
+  },
   { path: '**', redirectTo: '' },
 ];

@@ -5,9 +5,11 @@ Hold is a full-stack generic resource booking app. Authenticated users pick a re
 ## Features
 
 - Multi-tenant organizations: users belong to a company; resources/bookings/invoices are scoped by org
-- Register / sign in with JWT (`USER` by default; create-org makers become `ADMIN`)
+- Roles: `USER`, org `ADMIN`, and platform `SUPER_ADMIN` (manage all orgs; not tied to a tenant)
+- Register / sign in with JWT (`USER` when joining; create-org makers become org `ADMIN`)
 - Persisted resource catalog with types (`MEETING_ROOM`, `DESK`, `EQUIPMENT`, `OTHER`)
 - Admin resource create/edit (active/inactive) within their organization
+- Platform org list/create for `SUPER_ADMIN`
 - Create, view, and edit bookings with start/end date-time
 - Hourly pricing with total amount snapshotted on each booking
 - Stay rules per resource: min/max duration and turnover buffer
@@ -149,6 +151,9 @@ Base path: `/api/v1`
 | `GET` | `/invoices` | Current user’s invoices (`?status=`) |
 | `GET` | `/admin/bookings` | Org bookings (**ADMIN**; `?status=&resourceId=&userId=`) |
 | `GET` | `/admin/invoices` | Org invoices (**ADMIN**; `?status=&userId=&bookingId=`) |
+| `GET` | `/platform/organizations` | List all orgs (**SUPER_ADMIN**) |
+| `GET` | `/platform/organizations/{id}` | Org detail + user count (**SUPER_ADMIN**) |
+| `POST` | `/platform/organizations` | Create org (**SUPER_ADMIN**; `{ "name" }`) |
 | `GET` | `/notifications` | Current user’s notifications |
 | `GET` | `/notifications/unread-count` | Unread badge count |
 | `POST` | `/notifications/{id}/read` | Mark one read |
@@ -160,7 +165,16 @@ Seeded demo org (`V11` → `V12`): slug **`hold`**, name **Hold Demo**. Seed adm
 | --- | --- |
 | Email | `admin@hold.com` |
 | Password | `Admin123!` |
+| Role | `ADMIN` |
 | Org slug | `hold` |
+
+Seeded platform super admin (`V13`) — no org; manages all tenants:
+
+| Field | Value |
+| --- | --- |
+| Email | `superadmin@hold.com` |
+| Password | `SuperAdmin123!` |
+| Role | `SUPER_ADMIN` |
 
 Promote an admin within an org (after register/login once):
 

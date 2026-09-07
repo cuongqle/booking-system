@@ -72,4 +72,20 @@ public final class AuthTestSupport {
 
 		return JsonPath.read(result.getResponse().getContentAsString(), "$.accessToken");
 	}
+
+	public static String loginSuperAdminAndGetToken(MockMvc mockMvc) throws Exception {
+		MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								  "email": "superadmin@hold.com",
+								  "password": "SuperAdmin123!"
+								}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.role").value("SUPER_ADMIN"))
+				.andReturn();
+
+		return JsonPath.read(result.getResponse().getContentAsString(), "$.accessToken");
+	}
 }

@@ -28,18 +28,26 @@ public class JwtService {
 		Date now = new Date();
 		Date expiry = new Date(now.getTime() + expirationMs);
 
-		return Jwts.builder()
+		var builder = Jwts.builder()
 				.subject(user.getEmail())
 				.claim("userId", user.getId())
-				.claim("organizationId", user.getOrganizationId())
-				.claim("organizationName", organizationName)
-				.claim("organizationSlug", organizationSlug)
 				.claim("fullName", user.getFullName())
 				.claim("role", user.getRole().name())
 				.issuedAt(now)
 				.expiration(expiry)
-				.signWith(secretKey)
-				.compact();
+				.signWith(secretKey);
+
+		if (user.getOrganizationId() != null) {
+			builder.claim("organizationId", user.getOrganizationId());
+		}
+		if (organizationName != null) {
+			builder.claim("organizationName", organizationName);
+		}
+		if (organizationSlug != null) {
+			builder.claim("organizationSlug", organizationSlug);
+		}
+
+		return builder.compact();
 	}
 
 	public boolean isValid(String token) {
@@ -60,7 +68,14 @@ public class JwtService {
 	}
 
 	public Long extractOrganizationId(String token) {
-		return extractLongClaim(token, "organizationId");
+		Object value = parseClaims(token).get("organizationId");
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Number number) {
+			return number.longValue();
+		}
+		throw new IllegalArgumentException("JWT organizationId claim is invalid");
 	}
 
 	public String extractOrganizationName(String token) {

@@ -43,6 +43,27 @@ class JwtServiceTest {
 	}
 
 	@Test
+	void generateAndParseToken_withoutOrganization_forSuperAdmin() {
+		User user = new User(
+				9L,
+				null,
+				"superadmin@hold.com",
+				"hash",
+				"Super",
+				UserRole.SUPER_ADMIN,
+				Instant.now(),
+				Instant.now());
+
+		String token = jwtService.generateToken(user, null, null);
+
+		assertThat(jwtService.isValid(token)).isTrue();
+		assertThat(jwtService.extractOrganizationId(token)).isNull();
+		assertThat(jwtService.extractOrganizationName(token)).isNull();
+		assertThat(jwtService.extractOrganizationSlug(token)).isNull();
+		assertThat(jwtService.extractRole(token)).isEqualTo(UserRole.SUPER_ADMIN);
+	}
+
+	@Test
 	void isValid_rejectsTamperedToken() {
 		User user = new User(
 				1L, 1L, "bob@example.com", "hash", "Bob", UserRole.USER, Instant.now(), Instant.now());

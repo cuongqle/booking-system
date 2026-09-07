@@ -39,7 +39,9 @@ export class LoginPage {
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.submitting.set(false);
-        void this.router.navigateByUrl('/bookings');
+        void this.router.navigateByUrl(
+          this.auth.isSuperAdmin() ? '/platform/organizations' : '/bookings',
+        );
       },
       error: (err) => {
         this.submitting.set(false);

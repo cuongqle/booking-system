@@ -6,6 +6,7 @@ import com.bookingsystem.application.user.RegisterUserCommand;
 import com.bookingsystem.application.user.UserService;
 import com.bookingsystem.domain.organization.Organization;
 import com.bookingsystem.domain.user.User;
+import com.bookingsystem.domain.user.UserRole;
 import com.bookingsystem.infrastructure.security.JwtService;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,17 @@ public class AuthService {
 	}
 
 	private AuthResult toResult(User user) {
+		if (user.getRole() == UserRole.SUPER_ADMIN || user.getOrganizationId() == null) {
+			return new AuthResult(
+					jwtService.generateToken(user, null, null),
+					user.getId(),
+					null,
+					null,
+					null,
+					user.getEmail(),
+					user.getFullName(),
+					user.getRole());
+		}
 		Organization organization = organizationService.getById(user.getOrganizationId());
 		return new AuthResult(
 				jwtService.generateToken(user, organization.getName(), organization.getSlug()),

@@ -17,23 +17,35 @@
         </a>
 
         @if (auth.isAuthenticated()) {
-          <a
-            class="nav-link"
-            routerLink="/bookings"
-            routerLinkActive="is-active"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            Bookings
-          </a>
-          <a class="nav-link" routerLink="/bookings/calendar" routerLinkActive="is-active">Calendar</a>
-          <a class="nav-link" routerLink="/invoices" routerLinkActive="is-active">Invoices</a>
-          @if (auth.isAdmin()) {
-            <a class="nav-link" routerLink="/resources" routerLinkActive="is-active">Resources</a>
+          @if (auth.isSuperAdmin()) {
+            <a class="nav-link" routerLink="/platform/organizations" routerLinkActive="is-active">
+              Organizations
+            </a>
+          } @else {
+            <a
+              class="nav-link"
+              routerLink="/bookings"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              Bookings
+            </a>
+            <a class="nav-link" routerLink="/bookings/calendar" routerLinkActive="is-active">Calendar</a>
+            <a class="nav-link" routerLink="/invoices" routerLinkActive="is-active">Invoices</a>
+            @if (auth.isAdmin()) {
+              <a class="nav-link" routerLink="/resources" routerLinkActive="is-active">Resources</a>
+            }
           }
           <app-notification-bell />
           <span class="hidden text-[var(--ink-soft)] md:inline">
             {{ auth.currentUser()?.fullName }}
-            <span class="text-[var(--ink-faint,var(--ink-soft))]">· {{ auth.currentUser()?.organizationName }}</span>
+            @if (auth.isSuperAdmin()) {
+              <span class="text-[var(--ink-faint,var(--ink-soft))]">· Platform</span>
+            } @else if (auth.currentUser()?.organizationName) {
+              <span class="text-[var(--ink-faint,var(--ink-soft))]">
+                · {{ auth.currentUser()?.organizationName }}
+              </span>
+            }
           </span>
           <button class="btn btn-ghost !px-3 !py-1.5 text-sm" type="button" (click)="logout()">
             Log out
@@ -57,8 +69,12 @@
         <nav class="app-footer__bar-links">
           <a routerLink="/">Home</a>
           @if (auth.isAuthenticated()) {
-            <a routerLink="/bookings">Bookings</a>
-            <a routerLink="/invoices">Invoices</a>
+            @if (auth.isSuperAdmin()) {
+              <a routerLink="/platform/organizations">Organizations</a>
+            } @else {
+              <a routerLink="/bookings">Bookings</a>
+              <a routerLink="/invoices">Invoices</a>
+            }
           } @else {
             <a routerLink="/auth/login">Sign in</a>
             <a routerLink="/auth/register">Join</a>

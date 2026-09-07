@@ -1,12 +1,12 @@
-export type UserRole = 'USER' | 'ADMIN';
+export type UserRole = 'USER' | 'ADMIN' | 'SUPER_ADMIN';
 
 export interface AuthResponse {
   accessToken: string;
   tokenType: string;
   userId: number;
-  organizationId: number;
-  organizationName: string;
-  organizationSlug: string;
+  organizationId: number | null;
+  organizationName: string | null;
+  organizationSlug: string | null;
   email: string;
   fullName: string;
   role: UserRole;
@@ -27,9 +27,9 @@ export interface LoginRequest {
 
 export interface AuthUser {
   userId: number;
-  organizationId: number;
-  organizationName: string;
-  organizationSlug: string;
+  organizationId: number | null;
+  organizationName: string | null;
+  organizationSlug: string | null;
   email: string;
   fullName: string;
   role: UserRole;

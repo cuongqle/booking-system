@@ -21,8 +21,12 @@
         </p>
         <div class="landing-hero__actions fade-up-delay">
           @if (auth.isAuthenticated()) {
-            <a class="btn btn-primary" routerLink="/bookings">Open bookings</a>
-            <a class="btn btn-ghost" routerLink="/bookings/calendar">View calendar</a>
+            @if (auth.isSuperAdmin()) {
+              <a class="btn btn-primary" routerLink="/platform/organizations">Manage organizations</a>
+            } @else {
+              <a class="btn btn-primary" routerLink="/bookings">Open bookings</a>
+              <a class="btn btn-ghost" routerLink="/bookings/calendar">View calendar</a>
+            }
           } @else {
             <a class="btn btn-primary" routerLink="/auth/register">Start a workspace</a>
             <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
@@ -217,8 +221,12 @@
       </p>
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
         @if (auth.isAuthenticated()) {
-          <a class="btn btn-primary" routerLink="/bookings/new">Book a resource</a>
-          <a class="btn btn-ghost" routerLink="/bookings">My bookings</a>
+          @if (auth.isSuperAdmin()) {
+            <a class="btn btn-primary" routerLink="/platform/organizations">Manage organizations</a>
+          } @else {
+            <a class="btn btn-primary" routerLink="/bookings/new">Book a resource</a>
+            <a class="btn btn-ghost" routerLink="/bookings">My bookings</a>
+          }
         } @else {
           <a class="btn btn-primary" routerLink="/auth/register">Create workspace</a>
           <a class="btn btn-ghost" routerLink="/auth/login">Sign in</a>
