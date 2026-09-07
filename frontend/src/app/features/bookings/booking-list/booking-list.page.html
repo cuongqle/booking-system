@@ -1,4 +1,4 @@
-<section class="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
+<section class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 fade-up">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
       <p class="text-sm font-medium text-[var(--accent-deep)]">Workspace</p>
@@ -15,7 +15,7 @@
     <p class="alert-error mt-6">{{ error() }}</p>
   }
 
-  <div class="mt-8">
+  <div class="mt-8 w-full">
     @if (loading()) {
       <p class="text-[var(--ink-soft)]">Loading your bookings…</p>
     } @else if (bookings().length === 0) {
@@ -27,23 +27,27 @@
         <a class="btn btn-primary mt-6" routerLink="/bookings/new">Create booking</a>
       </div>
     } @else {
-      <ul class="panel overflow-hidden">
+      <ul class="panel w-full overflow-hidden">
         @for (booking of bookings(); track booking.id) {
           <li class="border-b border-[var(--line)] last:border-b-0">
             <a
-              class="list-row flex items-center justify-between gap-4 px-5 py-4"
+              class="list-row flex w-full items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5"
               [routerLink]="['/bookings', booking.id]"
             >
-              <div>
-                <p class="font-semibold text-[var(--ink)]">{{ booking.resourceId }}</p>
-                <p class="mt-0.5 text-sm text-[var(--ink-soft)]">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <p class="font-semibold text-[var(--ink)]">{{ booking.resourceId }}</p>
+                  <span [class]="statusMeta(booking.status).chipClass">
+                    {{ statusMeta(booking.status).label }}
+                  </span>
+                </div>
+                <p class="mt-1 text-sm text-[var(--ink-soft)]">
                   {{ formatRange(booking.startDate, booking.endDate) }}
-                  · {{ formatMoney(booking.totalAmount, booking.currency) }}
                 </p>
               </div>
-              <span [class]="statusMeta(booking.status).chipClass">
-                {{ statusMeta(booking.status).label }}
-              </span>
+              <p class="shrink-0 text-sm font-semibold text-[var(--accent-deep)] sm:text-base">
+                {{ formatMoney(booking.totalAmount, booking.currency) }}
+              </p>
             </a>
           </li>
         }
