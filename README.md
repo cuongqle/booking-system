@@ -2,6 +2,8 @@
 
 Hold is a full-stack generic resource booking app. Authenticated users pick a resource (meeting room, desk, equipment, and more), book a time window, track reservations on a calendar, and update booking status. Overlapping **Pending** or **Confirmed** bookings on the same resource are rejected.
 
+**Demo:** [https://booking-system-neon-eta.vercel.app/](https://booking-system-neon-eta.vercel.app/)
+
 ## Features
 
 - Multi-tenant organizations: users belong to a company; resources/bookings/invoices are scoped by org
